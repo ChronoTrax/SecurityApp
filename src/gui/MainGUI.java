@@ -12,9 +12,6 @@ public class MainGUI extends JFrame{
     private JPanel genPasswordPanel;
     private JButton generatePasswordBtn;
     private JTextArea generatePasswordField;
-    private JPanel spacerPanel;
-    private JLabel MD5HashLabel;
-    private JButton uploadFileBtn;
 
     public MainGUI() {
         // setup panel
@@ -40,5 +37,4 @@ public class MainGUI extends JFrame{
     public static void main(String[] args) {
         new MainGUI();
     }
-
 }
