@@ -28,7 +28,7 @@ public class MainGUI extends JFrame{
         submitTestPasswordBtn.addActionListener(e -> {
             String password = passwordTestField.getText();
 
-            String result = tools.PasswordTest.isPasswordStrong(password);
+            String result = tools.PasswordTools.isPasswordStrong(password);
 
             passwordTestResultField.setText(result);
         });
