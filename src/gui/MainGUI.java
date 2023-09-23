@@ -3,6 +3,9 @@ package gui;
 import tools.*;
 
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 public class MainGUI extends JFrame{
     private JPanel mainPanel;
@@ -48,11 +51,22 @@ public class MainGUI extends JFrame{
 
         // upload file button
         uploadFileBtn.addActionListener(e -> {
+            try {
+               Desktop.getDesktop().open(new File(System.getProperty("user.home")));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
 
         });
     }
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
         new MainGUI();
     }
 }
