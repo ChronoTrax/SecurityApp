@@ -11,8 +11,8 @@ public class MainGUI extends JFrame {
     private JPanel mainPanel;
     private JPanel passwordTestPanel;
     private JPanel hashPanel;
-    private JTextField passwordTestField;
-    private JButton submitTestPasswordBtn;
+    private JTextField passwordTestInputField;
+    private JButton submitPasswordTestBtn;
     private JTextArea passwordTestResultField;
     private JPanel genPasswordPanel;
     private JPanel savePasswordPanel;
@@ -29,6 +29,7 @@ public class MainGUI extends JFrame {
     private JButton loadWebsiteSearchbtn;
     private JTextField loadUsernameSearchField;
     private JButton loadUsernameSearchBtn;
+    private JTextArea loadPasswordResultField;
 
 
     public MainGUI() {
@@ -42,8 +43,8 @@ public class MainGUI extends JFrame {
         setVisible(true);
 
         // test password button
-        submitTestPasswordBtn.addActionListener(e -> {
-            String password = passwordTestField.getText();
+        submitPasswordTestBtn.addActionListener(e -> {
+            String password = passwordTestInputField.getText();
 
             String result = PasswordTools.isPasswordStrong(password);
 
@@ -77,12 +78,42 @@ public class MainGUI extends JFrame {
 
         // load password with website search
         loadWebsiteSearchbtn.addActionListener(e -> {
+            String website = loadWebsiteSearchField.getText();
 
+            try {
+                SavingTools.PasswordRecord record = SavingTools.findPasswordRecordWithWebsite(website);
+                if (record == null) {
+                    JOptionPane.showMessageDialog(mainPanel, "Could not find password for: " + website,
+                            "Could Not find Password", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                loadPasswordResultField.setText(record.toString());
+            } catch (Exception exc) {
+                JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                exc.getClass() + "\n" + exc.getMessage(),
+                        "Error!", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         // load password with username search
         loadUsernameSearchBtn.addActionListener(e -> {
+            String username = loadUsernameSearchField.getText();
 
+            try {
+                SavingTools.PasswordRecord record = SavingTools.findPasswordRecordWithUsername(username);
+                if (record == null) {
+                    JOptionPane.showMessageDialog(mainPanel, "Could not find password for: " + username,
+                            "Could Not find Password", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                loadPasswordResultField.setText(record.toString());
+            } catch (Exception exc) {
+                JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                exc.getClass() + "\n" + exc.getMessage(),
+                        "Error!", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         // upload file button

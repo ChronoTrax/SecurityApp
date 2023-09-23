@@ -19,7 +19,12 @@ public class SavingTools {
     }
 
     public record PasswordRecord(String website, String username, String password) {
-
+        @Override
+        public String toString() {
+            return "Website: " + website + '\n' +
+                    "Username: " + username + '\n' +
+                    "Password: " + password + '\n';
+        }
     }
 
     private static final String CREATE_DATABASE = "create table if not exists Passwords (website varchar(150) not null primary key, username varchar(50) not null, password varchar(50) not null);";
