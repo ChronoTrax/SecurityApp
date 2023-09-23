@@ -3,6 +3,7 @@ package gui;
 import tools.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -44,6 +45,7 @@ public class MainGUI extends JFrame {
 
             String result = PasswordTools.isPasswordStrong(password);
 
+            passwordTestResultField.setFont(new Font("Arial", Font.PLAIN, 18));
             passwordTestResultField.setText(result);
         });
 
@@ -51,6 +53,7 @@ public class MainGUI extends JFrame {
         genPasswordBtn.addActionListener(e -> {
             String newPassword = PasswordTools.generatePassword();
 
+            genPasswordField.setFont(new Font("Arial", Font.PLAIN, 18));
             genPasswordField.setText(newPassword);
         });
 
@@ -82,6 +85,7 @@ public class MainGUI extends JFrame {
 
                 try {
                     String hash = HashTest.getMD5(selectedFile.getAbsolutePath());
+                    hashField.setFont(new Font("Arial", Font.PLAIN, 20));
                     hashField.setText("MD5 Hash: " + hash);
                     //System.out.println("MD5 Hash: " + hash);
                 } catch (IOException | NoSuchAlgorithmException ex) {
