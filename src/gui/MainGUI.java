@@ -89,7 +89,9 @@ public class MainGUI extends JFrame {
                     hashField.setText("MD5 Hash: " + hash);
                     //System.out.println("MD5 Hash: " + hash);
                 } catch (IOException | NoSuchAlgorithmException ex) {
-                    throw new RuntimeException(ex);
+                    JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                    ex.getClass() + "\n" + ex.getMessage(),
+                            "Error!", JOptionPane.ERROR_MESSAGE);
                 }
 
             } else {
