@@ -1,12 +1,12 @@
 package tools;
 
-import java.util.Arrays;
+import java.util.Random;
 
-public class PasswordTest {
-    private static char[] lowercase = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-    private static char[] uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-    private static char[] numbers = "0123456789".toCharArray();
-    private static char[] specials = "`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?".toCharArray();
+public class PasswordTools {
+    private static final String lowercase = "abcdefghijklmnopqrstuvwxyz";
+    private static final String uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String numbers = "0123456789";
+    private static final String specials = "`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?";
 
     public static String isPasswordStrong(String password) {
         // check length
@@ -22,7 +22,7 @@ public class PasswordTest {
         // check for numbers
         {
             boolean pass = false;
-            for (Character c : numbers) {
+            for (Character c : numbers.toCharArray()) {
                 if (password.contains(String.valueOf(c))) {
                     pass = true;
                     break;
@@ -36,7 +36,7 @@ public class PasswordTest {
         // check for special characters
         {
             boolean pass = false;
-            for (Character c : specials) {
+            for (Character c : specials.toCharArray()) {
                 if (password.contains(String.valueOf(c))) {
                     pass = true;
                     break;
@@ -48,5 +48,21 @@ public class PasswordTest {
         }
 
         return "STRONG PASSWORD.";
+    }
+
+    public static String generatePassword() {
+        Random rand = new Random();
+
+        String allChars = lowercase + uppercase + numbers + specials;
+
+        int length = rand.nextInt(9) + 8;
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            sb.append(allChars.charAt(rand.nextInt(allChars.length())));
+        }
+
+        return sb.toString();
     }
 }
