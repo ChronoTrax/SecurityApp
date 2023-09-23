@@ -5,7 +5,9 @@ import tools.PasswordTools;
 import tools.SavingTools;
 
 import javax.swing.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
@@ -35,9 +37,11 @@ public class MainGUI extends JFrame {
     private JButton deleteLoadedPasswordBtn;
     private JButton deleteDatabaseBtn;
 
-    private SavingTools.PasswordRecord loadedPassword = null;
 
-    private String masterPassword = "123";
+    private SavingTools.PasswordRecord loadedPasswordRecord = null;
+
+
+    public static char[] masterPassword = null;
 
 
     public MainGUI() {
@@ -49,6 +53,9 @@ public class MainGUI extends JFrame {
 
         // reveal window
         setVisible(true);
+
+        // ask for master password
+        promptMasterPassword();
 
         // test password button
         submitPasswordTestBtn.addActionListener(e -> {
@@ -68,11 +75,19 @@ public class MainGUI extends JFrame {
 
         // save password button
         savePasswordBtn.addActionListener(e -> {
-            String website = saveWebsiteField.getText();
-            String username = saveUsernameField.getText();
-            String password = savePasswordField.getText();
-
             try {
+                // check for master password
+                if (masterPassword == null) {
+                    promptMasterPassword();
+                    return;
+                }
+
+                // get user inputs
+                String website = saveWebsiteField.getText();
+                String username = saveUsernameField.getText();
+                String password = savePasswordField.getText();
+
+                // try saving password to database
                 if (SavingTools.savePassword(masterPassword, website, username, password)) {
                     JOptionPane.showMessageDialog(mainPanel, "Saved password.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
@@ -102,7 +117,7 @@ public class MainGUI extends JFrame {
                 }
 
                 loadPasswordResultField.setText(record.toString());
-                loadedPassword = record;
+                loadedPasswordRecord = record;
 
                 // clear input fields
                 loadWebsiteSearchField.setText("");
@@ -126,7 +141,7 @@ public class MainGUI extends JFrame {
                 }
 
                 loadPasswordResultField.setText(record.toString());
-                loadedPassword = record;
+                loadedPasswordRecord = record;
 
                 // clear input fields
                 loadUsernameSearchField.setText("");
@@ -139,7 +154,7 @@ public class MainGUI extends JFrame {
 
         // delete loaded password
         deleteLoadedPasswordBtn.addActionListener(e -> {
-            if (loadedPassword == null) {
+            if (loadedPasswordRecord == null) {
                 JOptionPane.showMessageDialog(mainPanel, "No password has been loaded yet.",
                         "Error!", JOptionPane.ERROR_MESSAGE);
 
@@ -147,12 +162,12 @@ public class MainGUI extends JFrame {
             }
 
             int choice = JOptionPane.showConfirmDialog(mainPanel,
-                    "Are you sure you want to delete password for: " + loadedPassword.website() + "?",
+                    "Are you sure you want to delete password for: " + loadedPasswordRecord.website() + "?",
                     "Confirmation", JOptionPane.YES_NO_OPTION);
 
             if (choice == JOptionPane.YES_OPTION) {
                 try {
-                    if (SavingTools.deletePasswordRecord(loadedPassword.website())) {
+                    if (SavingTools.deletePasswordRecord(loadedPasswordRecord.website())) {
                         JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
                                 "Saved", JOptionPane.INFORMATION_MESSAGE);
 
@@ -160,7 +175,7 @@ public class MainGUI extends JFrame {
                         loadPasswordResultField.setText("");
 
                         // reset loaded password
-                        loadedPassword = null;
+                        loadedPasswordRecord = null;
                     }
                 } catch (Exception exc) {
                     JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
@@ -185,7 +200,7 @@ public class MainGUI extends JFrame {
                         loadPasswordResultField.setText("");
 
                         // reset loaded password
-                        loadedPassword = null;
+                        loadedPasswordRecord = null;
                     }
                 } catch (Exception exc) {
                     JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
@@ -209,9 +224,9 @@ public class MainGUI extends JFrame {
 
                     String sha256 = HashTools.calculateSHA256(selectedFile.getAbsolutePath());
                     hashField.append("SHA-256 Hash: " + sha256);
-                } catch (IOException | NoSuchAlgorithmException ex) {
+                } catch (IOException | NoSuchAlgorithmException exc) {
                     JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
-                                    ex.getClass() + "\n" + ex.getMessage(),
+                                    exc.getClass() + "\n" + exc.getMessage(),
                             "Error!", JOptionPane.ERROR_MESSAGE);
                 }
 
@@ -220,6 +235,47 @@ public class MainGUI extends JFrame {
             }
 
         });
+    }
+
+    private void promptMasterPassword() {
+        try {
+            // check if master password has been set up yet
+            File file = new File("masterpass.txt");
+
+            // check if file exists
+            if (!file.exists()) {
+                JOptionPane.showMessageDialog(mainPanel, "Master password has not been set up yet.",
+                        "Master Password not Entered", JOptionPane.INFORMATION_MESSAGE);
+
+                new NewMasterPasswordGUI();
+                return;
+            }
+
+            FileReader fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            String line = bufferedReader.readLine();
+
+            // master password has not been set up
+            if (line == null) {
+                JOptionPane.showMessageDialog(mainPanel, "Master password has not been set up yet.",
+                        "Master Password not Entered", JOptionPane.INFORMATION_MESSAGE);
+
+                new NewMasterPasswordGUI();
+                return;
+            }
+
+            bufferedReader.close();
+
+            // prompt for master password
+            JOptionPane.showMessageDialog(mainPanel, "Master password has not been entered yet.",
+                    "Master Password not Entered", JOptionPane.INFORMATION_MESSAGE);
+            new MasterPasswordGUI();
+        } catch (Exception exc) {
+            JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                            exc.getClass() + "\n" + exc.getMessage(),
+                    "Error!", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public static void main(String[] args) {

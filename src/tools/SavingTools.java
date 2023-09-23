@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 
 public class SavingTools {
@@ -27,7 +28,7 @@ public class SavingTools {
         }
     }
 
-    public static boolean savePassword(String masterPassword, String website, String username, String password) throws SQLException {
+    public static boolean savePassword(char[] masterPassword, String website, String username, String password) throws SQLException {
         // check null or blank
         if (website == null || website.isBlank() ||
                 username == null || username.isBlank() ||
@@ -47,7 +48,7 @@ public class SavingTools {
 
         // encrypt password
         //TODO: encrypt password
-        String encryptedPass = password + masterPassword;
+        String encryptedPass = password + Arrays.toString(masterPassword);
 
         // make sure table exists
         createTables();
