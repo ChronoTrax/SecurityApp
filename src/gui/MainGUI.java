@@ -17,6 +17,8 @@ public class MainGUI extends JFrame{
     private JButton genPasswordBtn;
     private JTextArea genPasswordField;
 
+    private JButton uploadFileBtn;
+
     public MainGUI() {
         // setup panel
         setContentPane(mainPanel);
@@ -42,6 +44,11 @@ public class MainGUI extends JFrame{
             String newPassword = PasswordTools.generatePassword();
 
             genPasswordField.setText(newPassword);
+        });
+
+        // upload file button
+        uploadFileBtn.addActionListener(e -> {
+
         });
     }
 
