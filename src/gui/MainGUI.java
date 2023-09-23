@@ -21,6 +21,10 @@ public class MainGUI extends JFrame{
     private JTextArea genPasswordField;
 
     private JButton uploadFileBtn;
+    private JTextField saveWebsiteField;
+    private JTextField saveUsernameField;
+    private JTextField savePasswordField;
+    private JButton savePasswordBtn;
 
     public MainGUI() {
         // setup panel
@@ -47,6 +51,25 @@ public class MainGUI extends JFrame{
             String newPassword = PasswordTools.generatePassword();
 
             genPasswordField.setText(newPassword);
+        });
+
+        // save password button
+        savePasswordBtn.addActionListener(e -> {
+            String website = saveWebsiteField.getText();
+            String username = saveUsernameField.getText();
+            String password = savePasswordField.getText();
+
+            try {
+                boolean success = SavingTools.savePassword(website, username, password);
+
+                if (success) {
+                    JOptionPane.showMessageDialog(mainPanel, "Saved password.",
+                            "Saved", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (Exception exc) {
+                JOptionPane.showMessageDialog(mainPanel, "Something went wrong. " + exc,
+                        "Error!", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         // upload file button
