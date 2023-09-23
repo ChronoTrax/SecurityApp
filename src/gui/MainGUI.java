@@ -10,6 +10,8 @@ public class MainGUI extends JFrame{
     private JButton submitTestPasswordBtn;
     private JTextArea passwordTestResultField;
     private JPanel genPasswordPanel;
+    private JPanel savePasswordPanel;
+    private JPanel loadPasswordPanel;
     private JButton generatePasswordBtn;
     private JTextArea generatePasswordField;
 
