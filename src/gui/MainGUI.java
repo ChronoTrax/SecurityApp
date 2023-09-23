@@ -6,6 +6,8 @@ import tools.SavingTools;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 public class MainGUI extends JFrame{
     private JPanel mainPanel;
@@ -80,8 +82,14 @@ public class MainGUI extends JFrame{
 
             if (returnValue == JFileChooser.APPROVE_OPTION){
                 File selectedFile = fileChooser.getSelectedFile();
-                //String hash = HashTest.getMD5(selectedFile);
-               // System.out.println("MD5 Hash: " + hash);
+
+                try {
+                    String hash = HashTest.getMD5(selectedFile.getAbsolutePath());
+                    System.out.println("MD5 Hash: " + hash);
+                } catch (IOException | NoSuchAlgorithmException ex) {
+                    throw new RuntimeException(ex);
+                }
+                // System.out.println("MD5 Hash: " + hash);
 
             } else {
                 System.out.println("No file selected. ");
