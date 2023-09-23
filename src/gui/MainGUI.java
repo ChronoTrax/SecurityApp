@@ -1,5 +1,7 @@
 package gui;
 
+import tools.*;
+
 import javax.swing.*;
 
 public class MainGUI extends JFrame{
@@ -12,8 +14,8 @@ public class MainGUI extends JFrame{
     private JPanel genPasswordPanel;
     private JPanel savePasswordPanel;
     private JPanel loadPasswordPanel;
-    private JButton generatePasswordBtn;
-    private JTextArea generatePasswordField;
+    private JButton genPasswordBtn;
+    private JTextArea genPasswordField;
 
     public MainGUI() {
         // setup panel
@@ -30,9 +32,16 @@ public class MainGUI extends JFrame{
         submitTestPasswordBtn.addActionListener(e -> {
             String password = passwordTestField.getText();
 
-            String result = tools.PasswordTools.isPasswordStrong(password);
+            String result = PasswordTools.isPasswordStrong(password);
 
             passwordTestResultField.setText(result);
+        });
+
+        // generate password button
+        genPasswordBtn.addActionListener(e -> {
+            String newPassword = PasswordTools.generatePassword();
+
+            genPasswordField.setText(newPassword);
         });
     }
 
