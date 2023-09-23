@@ -36,11 +36,11 @@ public class SavingTools {
     }
 
     private static final String CREATE_DATABASE = "create table if not exists Passwords (website varchar(150) not null primary key, username varchar(50) not null, password varchar(50) not null);";
-
     private static final String DROP_DATABASE = "drop table if exists Passwords;";
-
     private static final String INSERT_PASSWORD_RECORD = "insert into Passwords values ('%s', '%s', '%s');";
     private static final String SELECT_PASSWORD_RECORDS = "select * from Passwords;";
+    private static final String DELETE_PASSWORD_RECORD = "delete from Passwords where website = '%s';";
+
 
     public static boolean savePassword(PasswordRecord record) throws SQLException {
         // check null or blank
@@ -95,6 +95,16 @@ public class SavingTools {
         }
 
         return null;
+    }
+
+    public static boolean deletePasswordRecord(String website) throws SQLException {
+        if (website == null || website.isBlank()) {
+            throw new RuntimeException("website cannot be blank");
+        }
+
+        STATEMENT.execute(DELETE_PASSWORD_RECORD.formatted(website));
+
+        return true;
     }
 
     private static ArrayList<PasswordRecord> getPasswordRecords() throws SQLException {

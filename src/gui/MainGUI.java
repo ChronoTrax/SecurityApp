@@ -3,6 +3,8 @@ package gui;
 import tools.*;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +32,9 @@ public class MainGUI extends JFrame {
     private JTextField loadUsernameSearchField;
     private JButton loadUsernameSearchBtn;
     private JTextArea loadPasswordResultField;
+    private JButton deleteLoadedPasswordBtn;
+
+    private SavingTools.PasswordRecord loadedPassword = null;
 
 
     public MainGUI() {
@@ -68,6 +73,11 @@ public class MainGUI extends JFrame {
                 if (SavingTools.savePassword(new SavingTools.PasswordRecord(website, username, password))) {
                     JOptionPane.showMessageDialog(mainPanel, "Saved password.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
+
+                    // clear input fields
+                    saveWebsiteField.setText("");
+                    saveUsernameField.setText("");
+                    savePasswordField.setText("");
                 }
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
@@ -89,6 +99,10 @@ public class MainGUI extends JFrame {
                 }
 
                 loadPasswordResultField.setText(record.toString());
+                loadedPassword = record;
+
+                // clear input fields
+                loadWebsiteSearchField.setText("");
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                 exc.getClass() + "\n" + exc.getMessage(),
@@ -109,10 +123,45 @@ public class MainGUI extends JFrame {
                 }
 
                 loadPasswordResultField.setText(record.toString());
+                loadedPassword = record;
+
+                // clear input fields
+                loadUsernameSearchField.setText("");
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                 exc.getClass() + "\n" + exc.getMessage(),
                         "Error!", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // delete loaded password
+        deleteLoadedPasswordBtn.addActionListener(e -> {
+            if (loadedPassword == null) {
+                JOptionPane.showMessageDialog(mainPanel, "No password has been loaded yet.",
+                        "Error!", JOptionPane.ERROR_MESSAGE);
+            } else {
+                int choice = JOptionPane.showConfirmDialog(mainPanel,
+                        "Are you sure you want to delete password for: " + loadedPassword.website(),
+                        "Confirmation", JOptionPane.YES_NO_OPTION);
+
+                if (choice == JOptionPane.YES_OPTION) {
+                    try {
+                        if (SavingTools.deletePasswordRecord(loadedPassword.website())) {
+                            JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
+                                    "Saved", JOptionPane.INFORMATION_MESSAGE);
+
+                            // clear password field
+                            loadPasswordResultField.setText("");
+
+                            // reset loaded password
+                            loadedPassword = null;
+                        }
+                    } catch (Exception exc) {
+                        JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                        exc.getClass() + "\n" + exc.getMessage(),
+                                "Error!", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
 
@@ -126,11 +175,10 @@ public class MainGUI extends JFrame {
 
                 try {
                     String md5 = HashTools.getMD5(selectedFile.getAbsolutePath());
-                    hashField.setText("MD5 Hash: " + md5);
+                    hashField.setText("MD5 Hash: " + md5 + "\n");
 
                     String sha256 = HashTools.calculateSHA256(selectedFile.getAbsolutePath());
                     hashField.append("SHA-256 Hash: " + sha256);
-                    //System.out.println("MD5 Hash: " + hash);
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                     ex.getClass() + "\n" + ex.getMessage(),
