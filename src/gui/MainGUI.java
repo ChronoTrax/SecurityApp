@@ -1,11 +1,11 @@
 package gui;
 
-import tools.*;
+import tools.HashTest;
+import tools.PasswordTools;
+import tools.SavingTools;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 
 public class MainGUI extends JFrame{
     private JPanel mainPanel;
@@ -25,6 +25,7 @@ public class MainGUI extends JFrame{
     private JTextField saveUsernameField;
     private JTextField savePasswordField;
     private JButton savePasswordBtn;
+
 
     public MainGUI() {
         // setup panel
@@ -74,11 +75,22 @@ public class MainGUI extends JFrame{
 
         // upload file button
         uploadFileBtn.addActionListener(e -> {
-            try {
+            JFileChooser fileChooser = new JFileChooser();
+            int returnValue = fileChooser.showOpenDialog(null);
+
+            if (returnValue == JFileChooser.APPROVE_OPTION){
+                File selectedFile = fileChooser.getSelectedFile();
+                //String hash = HashTest.getMD5(selectedFile);
+               // System.out.println("MD5 Hash: " + hash);
+
+            } else {
+                System.out.println("No file selected. ");
+            }
+            /*try {
                Desktop.getDesktop().open(new File(System.getProperty("user.home")));
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
-            }
+            }*/
 
         });
     }
