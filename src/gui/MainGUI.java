@@ -1,10 +1,10 @@
 package gui;
 
-import tools.*;
+import tools.HashTools;
+import tools.PasswordTools;
+import tools.SavingTools;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -33,6 +33,7 @@ public class MainGUI extends JFrame {
     private JButton loadUsernameSearchBtn;
     private JTextArea loadPasswordResultField;
     private JButton deleteLoadedPasswordBtn;
+    private JButton deleteDatabaseBtn;
 
     private SavingTools.PasswordRecord loadedPassword = null;
 
@@ -139,28 +140,55 @@ public class MainGUI extends JFrame {
             if (loadedPassword == null) {
                 JOptionPane.showMessageDialog(mainPanel, "No password has been loaded yet.",
                         "Error!", JOptionPane.ERROR_MESSAGE);
-            } else {
-                int choice = JOptionPane.showConfirmDialog(mainPanel,
-                        "Are you sure you want to delete password for: " + loadedPassword.website(),
-                        "Confirmation", JOptionPane.YES_NO_OPTION);
 
-                if (choice == JOptionPane.YES_OPTION) {
-                    try {
-                        if (SavingTools.deletePasswordRecord(loadedPassword.website())) {
-                            JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
-                                    "Saved", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
 
-                            // clear password field
-                            loadPasswordResultField.setText("");
+            int choice = JOptionPane.showConfirmDialog(mainPanel,
+                    "Are you sure you want to delete password for: " + loadedPassword.website() + "?",
+                    "Confirmation", JOptionPane.YES_NO_OPTION);
 
-                            // reset loaded password
-                            loadedPassword = null;
-                        }
-                    } catch (Exception exc) {
-                        JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
-                                        exc.getClass() + "\n" + exc.getMessage(),
-                                "Error!", JOptionPane.ERROR_MESSAGE);
+            if (choice == JOptionPane.YES_OPTION) {
+                try {
+                    if (SavingTools.deletePasswordRecord(loadedPassword.website())) {
+                        JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
+                                "Saved", JOptionPane.INFORMATION_MESSAGE);
+
+                        // clear password field
+                        loadPasswordResultField.setText("");
+
+                        // reset loaded password
+                        loadedPassword = null;
                     }
+                } catch (Exception exc) {
+                    JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                    exc.getClass() + "\n" + exc.getMessage(),
+                            "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        deleteDatabaseBtn.addActionListener(e -> {
+            int choice = JOptionPane.showConfirmDialog(mainPanel,
+                    "Are you sure you want to delete all saved passwords?",
+                    "Confirmation", JOptionPane.YES_NO_OPTION);
+
+            if (choice == JOptionPane.YES_OPTION) {
+                try {
+                    if (SavingTools.deletePasswordDatabase()) {
+                        JOptionPane.showMessageDialog(mainPanel, "Deleted saved passwords.",
+                                "Saved", JOptionPane.INFORMATION_MESSAGE);
+
+                        // clear password field
+                        loadPasswordResultField.setText("");
+
+                        // reset loaded password
+                        loadedPassword = null;
+                    }
+                } catch (Exception exc) {
+                    JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                    exc.getClass() + "\n" + exc.getMessage(),
+                            "Error!", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });

@@ -99,6 +99,12 @@ public class SavingTools {
         return true;
     }
 
+    public static boolean deletePasswordDatabase() throws SQLException {
+        STATEMENT.execute(DROP_DATABASE);
+
+        return true;
+    }
+
     private static ArrayList<PasswordRecord> getPasswordRecords() throws SQLException {
         STATEMENT.execute(SELECT_PASSWORD_RECORDS);
         ResultSet rs = STATEMENT.getResultSet();
