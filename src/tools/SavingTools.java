@@ -7,15 +7,14 @@ import java.sql.Statement;
 
 public class SavingTools {
     private static final String DB_NAME = "jdbc:sqlite:passDB.sqlite";
+    private static final Connection CONNECTION;
+    private static final Statement STATEMENT;
 
-    private static final Connection conn;
-
-    private static final Statement st;
-
+    // establish connection and statement
     static {
         try {
-            conn = DriverManager.getConnection(DB_NAME);
-            st = conn.createStatement();
+            CONNECTION = DriverManager.getConnection(DB_NAME);
+            STATEMENT = CONNECTION.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -29,7 +28,7 @@ public class SavingTools {
 
     private static final String DROP_DATABASE = "drop table if exists Passwords;";
 
-    private static final String INSERT_PASSWORD_RECORD = "insert into Password values ('%s', '%s', '%s');";
+    private static final String INSERT_PASSWORD_RECORD = "insert into Passwords values ('%s', '%s', '%s');";
 
     public static boolean savePassword(PasswordRecord record) throws SQLException {
         // check null or blank
@@ -53,14 +52,13 @@ public class SavingTools {
         createTables();
 
         // add to database
-        st.execute(INSERT_PASSWORD_RECORD.formatted(record.website, record.username, record.password));
-
+        STATEMENT.execute(INSERT_PASSWORD_RECORD.formatted(record.website, record.username, record.password));
 
         return true;
     }
 
     private static void createTables() throws SQLException {
         // create tables
-        st.execute(CREATE_DATABASE);
+        STATEMENT.execute(CREATE_DATABASE);
     }
 }
