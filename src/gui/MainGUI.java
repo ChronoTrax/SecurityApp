@@ -3,7 +3,6 @@ package gui;
 import tools.*;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +25,10 @@ public class MainGUI extends JFrame {
     private JButton savePasswordBtn;
     private JTextArea hashField;
     private JButton uploadFileBtn;
+    private JTextField loadWebsiteSearchField;
+    private JButton loadWebsiteSearchbtn;
+    private JTextField loadUsernameSearchField;
+    private JButton loadUsernameSearchBtn;
 
 
     public MainGUI() {
@@ -38,14 +41,12 @@ public class MainGUI extends JFrame {
         // reveal window
         setVisible(true);
 
-
         // test password button
         submitTestPasswordBtn.addActionListener(e -> {
             String password = passwordTestField.getText();
 
             String result = PasswordTools.isPasswordStrong(password);
 
-            passwordTestResultField.setFont(new Font("Arial", Font.PLAIN, 18));
             passwordTestResultField.setText(result);
         });
 
@@ -53,7 +54,6 @@ public class MainGUI extends JFrame {
         genPasswordBtn.addActionListener(e -> {
             String newPassword = PasswordTools.generatePassword();
 
-            genPasswordField.setFont(new Font("Arial", Font.PLAIN, 18));
             genPasswordField.setText(newPassword);
         });
 
@@ -75,6 +75,16 @@ public class MainGUI extends JFrame {
             }
         });
 
+        // load password with website search
+        loadWebsiteSearchbtn.addActionListener(e -> {
+
+        });
+
+        // load password with username search
+        loadUsernameSearchBtn.addActionListener(e -> {
+
+        });
+
         // upload file button
         uploadFileBtn.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -85,7 +95,6 @@ public class MainGUI extends JFrame {
 
                 try {
                     String hash = HashTest.getMD5(selectedFile.getAbsolutePath());
-                    hashField.setFont(new Font("Arial", Font.PLAIN, 20));
                     hashField.setText("MD5 Hash: " + hash);
                     //System.out.println("MD5 Hash: " + hash);
                 } catch (IOException | NoSuchAlgorithmException ex) {
