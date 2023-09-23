@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-public class MainGUI extends JFrame{
+public class MainGUI extends JFrame {
     private JPanel mainPanel;
     private JPanel passwordTestPanel;
     private JPanel hashPanel;
@@ -80,7 +80,7 @@ public class MainGUI extends JFrame{
             JFileChooser fileChooser = new JFileChooser();
             int returnValue = fileChooser.showOpenDialog(null);
 
-            if (returnValue == JFileChooser.APPROVE_OPTION){
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
 
                 try {
@@ -89,16 +89,10 @@ public class MainGUI extends JFrame{
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     throw new RuntimeException(ex);
                 }
-                // System.out.println("MD5 Hash: " + hash);
 
             } else {
                 System.out.println("No file selected. ");
             }
-            /*try {
-               Desktop.getDesktop().open(new File(System.getProperty("user.home")));
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }*/
 
         });
     }
