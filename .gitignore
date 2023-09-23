@@ -27,3 +27,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/sqlite-jdbc-3.43.0.0.jar
+/passDB.sqlite

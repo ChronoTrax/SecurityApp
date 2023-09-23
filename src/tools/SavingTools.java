@@ -1,9 +1,7 @@
 package tools;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 
 public class SavingTools {
     private static final String DB_NAME = "jdbc:sqlite:passDB.sqlite";
@@ -29,6 +27,7 @@ public class SavingTools {
     private static final String DROP_DATABASE = "drop table if exists Passwords;";
 
     private static final String INSERT_PASSWORD_RECORD = "insert into Passwords values ('%s', '%s', '%s');";
+    private static final String SELECT_PASSWORD_RECORDS = "select * from Passwords;";
 
     public static boolean savePassword(PasswordRecord record) throws SQLException {
         // check null or blank
@@ -55,6 +54,53 @@ public class SavingTools {
         STATEMENT.execute(INSERT_PASSWORD_RECORD.formatted(record.website, record.username, record.password));
 
         return true;
+    }
+
+    public static PasswordRecord findPasswordRecordWithWebsite(String website) throws SQLException {
+        // get list
+        ArrayList<PasswordRecord> list = getPasswordRecords();
+
+        for (PasswordRecord record :
+                list) {
+            if (website.equals(record.website)) {
+                return record;
+            }
+        }
+
+        return null;
+    }
+
+    public static PasswordRecord findPasswordRecordWithUsername(String username) throws SQLException {
+        // get list
+        ArrayList<PasswordRecord> list = getPasswordRecords();
+
+        for (PasswordRecord record :
+                list) {
+            if (username.equals(record.username)) {
+                return record;
+            }
+        }
+
+        return null;
+    }
+
+    private static ArrayList<PasswordRecord> getPasswordRecords() throws SQLException {
+        STATEMENT.execute(SELECT_PASSWORD_RECORDS);
+        ResultSet rs = STATEMENT.getResultSet();
+
+        // create list
+        ArrayList<PasswordRecord> list = new ArrayList<>();
+
+        // loop through select results
+        while (rs.next()) {
+            // create new Record
+            PasswordRecord record = new PasswordRecord(rs.getString("website"),
+                    rs.getString("username"), rs.getString("password"));
+
+            list.add(record);
+        }
+
+        return list;
     }
 
     private static void createTables() throws SQLException {
