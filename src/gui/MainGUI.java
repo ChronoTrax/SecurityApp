@@ -9,6 +9,9 @@ public class MainGUI extends JFrame{
     private JTextField passwordTestField;
     private JButton submitTestPasswordBtn;
     private JTextArea passwordTestResultField;
+    private JPanel genPasswordPanel;
+    private JButton generatePasswordBtn;
+    private JTextArea generatePasswordField;
 
     public MainGUI() {
         // setup panel
