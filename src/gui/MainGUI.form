@@ -58,7 +58,7 @@
             </constraints>
             <properties>
               <editable value="false"/>
-              <font name="Arial" size="18"/>
+              <font name="Arial" size="14"/>
             </properties>
           </component>
         </children>
@@ -83,7 +83,7 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Choose a file to view MD5 Hash"/>
+              <text value="Choose a file to view Hashes"/>
               <toolTipText value="Upload a file"/>
             </properties>
           </component>
@@ -131,6 +131,7 @@
             </constraints>
             <properties>
               <editable value="false"/>
+              <font name="Arial" size="14"/>
             </properties>
           </component>
         </children>
@@ -293,6 +294,7 @@
                 </constraints>
                 <properties>
                   <editable value="false"/>
+                  <font name="Arial" size="14"/>
                 </properties>
               </component>
             </children>
@@ -307,6 +309,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
+          <font name="Arial" size="14"/>
         </properties>
       </component>
     </children>

@@ -68,6 +68,11 @@ public class MainGUI extends JFrame {
                 if (SavingTools.savePassword(new SavingTools.PasswordRecord(website, username, password))) {
                     JOptionPane.showMessageDialog(mainPanel, "Saved password.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
+
+                    // clear input fields
+                    saveWebsiteField.setText("");
+                    saveUsernameField.setText("");
+                    savePasswordField.setText("");
                 }
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
@@ -89,6 +94,9 @@ public class MainGUI extends JFrame {
                 }
 
                 loadPasswordResultField.setText(record.toString());
+
+                // clear input fields
+                loadWebsiteSearchField.setText("");
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                 exc.getClass() + "\n" + exc.getMessage(),
@@ -109,6 +117,9 @@ public class MainGUI extends JFrame {
                 }
 
                 loadPasswordResultField.setText(record.toString());
+
+                // clear input fields
+                loadUsernameSearchField.setText("");
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                 exc.getClass() + "\n" + exc.getMessage(),
@@ -126,11 +137,10 @@ public class MainGUI extends JFrame {
 
                 try {
                     String md5 = HashTools.getMD5(selectedFile.getAbsolutePath());
-                    hashField.setText("MD5 Hash: " + md5);
+                    hashField.setText("MD5 Hash: " + md5 + "\n");
 
                     String sha256 = HashTools.calculateSHA256(selectedFile.getAbsolutePath());
                     hashField.append("SHA-256 Hash: " + sha256);
-                    //System.out.println("MD5 Hash: " + hash);
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                     ex.getClass() + "\n" + ex.getMessage(),
