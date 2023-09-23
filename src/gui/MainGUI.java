@@ -94,8 +94,11 @@ public class MainGUI extends JFrame {
                 File selectedFile = fileChooser.getSelectedFile();
 
                 try {
-                    String hash = HashTest.getMD5(selectedFile.getAbsolutePath());
-                    hashField.setText("MD5 Hash: " + hash);
+                    String md5 = HashTools.getMD5(selectedFile.getAbsolutePath());
+                    hashField.setText("MD5 Hash: " + md5);
+
+                    String sha256 = HashTools.calculateSHA256(selectedFile.getAbsolutePath());
+                    hashField.append("SHA-256 Hash: " + sha256);
                     //System.out.println("MD5 Hash: " + hash);
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
