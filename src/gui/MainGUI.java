@@ -19,12 +19,12 @@ public class MainGUI extends JFrame {
     private JPanel loadPasswordPanel;
     private JButton genPasswordBtn;
     private JTextArea genPasswordField;
-
-    private JButton uploadFileBtn;
     private JTextField saveWebsiteField;
     private JTextField saveUsernameField;
     private JTextField savePasswordField;
     private JButton savePasswordBtn;
+    private JTextArea hashField;
+    private JButton uploadFileBtn;
 
 
     public MainGUI() {
@@ -82,7 +82,8 @@ public class MainGUI extends JFrame {
 
                 try {
                     String hash = HashTest.getMD5(selectedFile.getAbsolutePath());
-                    System.out.println("MD5 Hash: " + hash);
+                    hashField.setText("MD5 Hash: " + hash);
+                    //System.out.println("MD5 Hash: " + hash);
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     throw new RuntimeException(ex);
                 }
