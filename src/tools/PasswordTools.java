@@ -8,6 +8,14 @@ public class PasswordTools {
     private static final String numbers = "0123456789";
     private static final String specials = "`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?";
 
+    /**
+     * Tests if a password meets the length and complexity requirements of a strong password.
+     * A strong password should be at least 8 characters long, and contain at least one uppercase letter, lowercase
+     * letter, a number, and a special character.
+     *
+     * @param password the password to be tested.
+     * @return a String explaining the password's strength.
+     */
     public static String isPasswordStrong(String password) {
         // check length
         if (password.length() < 8) {
@@ -50,6 +58,11 @@ public class PasswordTools {
         return "STRONG PASSWORD.";
     }
 
+    /**
+     * Generates a random password of length 8 - 16, with random letters, numbers, and special characters.
+     *
+     * @return a randomized password String.
+     */
     public static String generatePassword() {
         Random rand = new Random();
 
