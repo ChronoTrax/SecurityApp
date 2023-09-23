@@ -1,9 +1,7 @@
 package tools;
 
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.PBEKeySpec;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -14,57 +12,52 @@ import java.util.Base64;
 public class SavingTools {
     private static final String DB_NAME = "jdbc:sqlite:passDB.sqlite";
     private static final Connection CONNECTION;
-    private static final Statement STATEMENT;
+    private static final String CREATE_DATABASE = "create table if not exists Passwords (website varchar(150) not null primary key, username varchar(50) not null, encryptedPass varchar(300) not null);";
+    private static final String DROP_DATABASE = "drop table if exists Passwords;";
+    private static final String INSERT_PASSWORD_RECORD = "insert into Passwords values (?, ?, ?);";
+    private static final String SELECT_PASSWORD_RECORDS = "select * from Passwords;";
+    private static final String DELETE_PASSWORD_RECORD = "delete from Passwords where website = ?;";
 
     // establish connection and statement
     static {
         try {
             CONNECTION = DriverManager.getConnection(DB_NAME);
-            STATEMENT = CONNECTION.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public record PasswordRecord(String website, String username, String password) {
-        @Override
-        public String toString() {
-            return "Website: " + website + '\n' +
-                    "Username: " + username + '\n' +
-                    "Password: " + password + '\n';
-        }
-    }
-
-    private static final String CREATE_DATABASE = "create table if not exists Passwords (website varchar(150) not null primary key, username varchar(50) not null, password varchar(50) not null);";
-    private static final String DROP_DATABASE = "drop table if exists Passwords;";
-    private static final String INSERT_PASSWORD_RECORD = "insert into Passwords values ('%s', '%s', '%s');";
-    private static final String SELECT_PASSWORD_RECORDS = "select * from Passwords;";
-    private static final String DELETE_PASSWORD_RECORD = "delete from Passwords where website = '%s';";
-
-
-    public static boolean savePassword(PasswordRecord record) throws SQLException {
+    public static boolean savePassword(String masterPassword, String website, String username, String password) throws SQLException {
         // check null or blank
-        if (record.website == null || record.website.isBlank() ||
-                record.username == null || record.username.isBlank() ||
-                record.password == null || record.password.isBlank()) {
+        if (website == null || website.isBlank() ||
+                username == null || username.isBlank() ||
+                password == null || password.isBlank()) {
             throw new RuntimeException("Website, username, and password cannot be blank.");
         }
 
         // check website length
-        if (record.website.length() > 150) {
+        if (website.length() > 150) {
             throw new RuntimeException("Website cannot be longer than 150 character.");
         }
 
-        // check username and password length
-        if (record.website.length() > 50) {
-            throw new RuntimeException("Username and password cannot be longer than 50 character.");
+        // check username length
+        if (username.length() > 50) {
+            throw new RuntimeException("Username cannot be longer than 50 character.");
         }
+
+        // encrypt password
+        //TODO: encrypt password
+        String encryptedPass = password + masterPassword;
 
         // make sure table exists
         createTables();
 
         // add to database
-        STATEMENT.execute(INSERT_PASSWORD_RECORD.formatted(record.website, record.username, record.password));
+        PreparedStatement ps = CONNECTION.prepareStatement(INSERT_PASSWORD_RECORD);
+        ps.setString(1, website);
+        ps.setString(2, username);
+        ps.setString(3, encryptedPass);
+        ps.execute();
 
         return true;
     }
@@ -102,20 +95,24 @@ public class SavingTools {
             throw new RuntimeException("website cannot be blank");
         }
 
-        STATEMENT.execute(DELETE_PASSWORD_RECORD.formatted(website));
+        PreparedStatement ps = CONNECTION.prepareStatement(DELETE_PASSWORD_RECORD);
+        ps.setString(1, website);
+        ps.execute();
 
         return true;
     }
 
     public static boolean deletePasswordDatabase() throws SQLException {
-        STATEMENT.execute(DROP_DATABASE);
+        PreparedStatement ps = CONNECTION.prepareStatement(DROP_DATABASE);
+        ps.execute();
 
         return true;
     }
 
     private static ArrayList<PasswordRecord> getPasswordRecords() throws SQLException {
-        STATEMENT.execute(SELECT_PASSWORD_RECORDS);
-        ResultSet rs = STATEMENT.getResultSet();
+        PreparedStatement ps = CONNECTION.prepareStatement(SELECT_PASSWORD_RECORDS);
+        ps.execute();
+        ResultSet rs = ps.getResultSet();
 
         // create list
         ArrayList<PasswordRecord> list = new ArrayList<>();
@@ -124,7 +121,7 @@ public class SavingTools {
         while (rs.next()) {
             // create new Record
             PasswordRecord record = new PasswordRecord(rs.getString("website"),
-                    rs.getString("username"), rs.getString("password"));
+                    rs.getString("username"), rs.getString("encryptedPass"));
 
             list.add(record);
         }
@@ -134,7 +131,8 @@ public class SavingTools {
 
     private static void createTables() throws SQLException {
         // create tables
-        STATEMENT.execute(CREATE_DATABASE);
+        PreparedStatement ps = CONNECTION.prepareStatement(CREATE_DATABASE);
+        ps.execute();
     }
 
     // improve method name
@@ -168,5 +166,14 @@ public class SavingTools {
         PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyLength);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         return factory.generateSecret(spec).getEncoded();
+    }
+
+    public record PasswordRecord(String website, String username, String encryptedPass) {
+        @Override
+        public String toString() {
+            return "Website: " + website + '\n' +
+                    "Username: " + username + '\n' +
+                    "Hashed Password: " + encryptedPass;
+        }
     }
 }

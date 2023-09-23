@@ -28,7 +28,7 @@ public class MainGUI extends JFrame {
     private JTextArea hashField;
     private JButton uploadFileBtn;
     private JTextField loadWebsiteSearchField;
-    private JButton loadWebsiteSearchbtn;
+    private JButton loadWebsiteSearchBtn;
     private JTextField loadUsernameSearchField;
     private JButton loadUsernameSearchBtn;
     private JTextArea loadPasswordResultField;
@@ -36,6 +36,8 @@ public class MainGUI extends JFrame {
     private JButton deleteDatabaseBtn;
 
     private SavingTools.PasswordRecord loadedPassword = null;
+
+    private String masterPassword = "123";
 
 
     public MainGUI() {
@@ -71,7 +73,7 @@ public class MainGUI extends JFrame {
             String password = savePasswordField.getText();
 
             try {
-                if (SavingTools.savePassword(new SavingTools.PasswordRecord(website, username, password))) {
+                if (SavingTools.savePassword(masterPassword, website, username, password)) {
                     JOptionPane.showMessageDialog(mainPanel, "Saved password.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
 
@@ -88,7 +90,7 @@ public class MainGUI extends JFrame {
         });
 
         // load password with website search
-        loadWebsiteSearchbtn.addActionListener(e -> {
+        loadWebsiteSearchBtn.addActionListener(e -> {
             String website = loadWebsiteSearchField.getText();
 
             try {
