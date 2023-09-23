@@ -1,7 +1,15 @@
 package tools;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.interfaces.PBEKey;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class SavingTools {
     private static final String DB_NAME = "jdbc:sqlite:passDB.sqlite";
@@ -127,5 +135,38 @@ public class SavingTools {
     private static void createTables() throws SQLException {
         // create tables
         STATEMENT.execute(CREATE_DATABASE);
+    }
+
+    // improve method name
+    public static void getHashAndSalt() {
+        String password = "";
+        byte[] salt = generateSalt();
+
+        try {
+            int iterations = 10000; // number of iterations
+            int keyLength = 256; // key length in bits
+
+            byte[] hashedPassword = hashPassword(password.toCharArray(), salt, iterations, keyLength);
+            String hashedPasswordBase64 = Base64.getEncoder().encodeToString(hashedPassword);
+
+            System.out.println("Salt: " + Base64.getEncoder().encodeToString(salt));
+            System.out.println("Hashed Password: " + hashedPasswordBase64);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static byte[] generateSalt() {
+        byte[] salt = new byte[16];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(salt);
+        return salt;
+    }
+
+    public static byte[] hashPassword(char[] password, byte[] salt, int iterations, int keyLength)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyLength);
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        return factory.generateSecret(spec).getEncoded();
     }
 }
