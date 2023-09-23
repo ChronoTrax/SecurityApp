@@ -1,8 +1,6 @@
 package gui;
 
-import tools.HashTest;
-import tools.PasswordTools;
-import tools.SavingTools;
+import tools.*;
 
 import javax.swing.*;
 import java.io.File;
@@ -61,14 +59,13 @@ public class MainGUI extends JFrame{
             String password = savePasswordField.getText();
 
             try {
-                boolean success = SavingTools.savePassword(website, username, password);
-
-                if (success) {
+                if (SavingTools.savePassword(new SavingTools.PasswordRecord(website, username, password))) {
                     JOptionPane.showMessageDialog(mainPanel, "Saved password.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
                 }
             } catch (Exception exc) {
-                JOptionPane.showMessageDialog(mainPanel, "Something went wrong. " + exc,
+                JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                exc.getClass() + "\n" + exc.getMessage(),
                         "Error!", JOptionPane.ERROR_MESSAGE);
             }
         });
