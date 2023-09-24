@@ -1,15 +1,10 @@
 package tools;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
+import gui.MainGUI;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 
 public class SavingTools {
     private static final String DB_NAME = "jdbc:sqlite:passDB.sqlite";
@@ -51,7 +46,7 @@ public class SavingTools {
         byte[] salt = HashTools.generateSalt();
 
         // encrypt password
-        String encryptedPass = EncryptionTools.encryptPassword(password, salt);
+        String encryptedPass = EncryptionTools.encryptPassword(MainGUI.masterPassword, password, salt);
 
         // make sure table exists
         createTables();
@@ -125,11 +120,11 @@ public class SavingTools {
         // loop through select results
         while (rs.next()) {
             // decrypt password
-            String pass = EncryptionTools.decryptPassword(rs.getString("encryptedPass").toCharArray(), rs.getString("salt").getBytes());
+            char[] pass = EncryptionTools.decryptPassword(MainGUI.masterPassword, rs.getString("encryptedPass"), rs.getString("salt").getBytes());
 
             // create new Record
             PasswordRecord record = new PasswordRecord(rs.getString("website"),
-                    rs.getString("username"), pass);
+                    rs.getString("username"), Arrays.toString(pass));
 
             list.add(record);
         }

@@ -4,12 +4,11 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
 public class EncryptionTools {
-    private static final String ENCRYTPION_ALGORITHM = "AES";
+    private static final String ENCRYPTION_ALGORITHM = "AES";
     private static final String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA256";
     private static final int KEY_LENGTH = 256; // Key size in bits
     private static final int ITERATIONS = 10000; // Number of iterations, can change
@@ -29,7 +28,7 @@ public class EncryptionTools {
         SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
         SecretKey key = factory.generateSecret(spec);
 
-        Cipher cipher = Cipher.getInstance(ENCRYTPION_ALGORITHM);
+        Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] encryptedPassword = cipher.doFinal(passwordBytes);
 
@@ -51,7 +50,7 @@ public class EncryptionTools {
         SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
         SecretKey key = factory.generateSecret(spec);
 
-        Cipher cipher = Cipher.getInstance(ENCRYTPION_ALGORITHM);
+        Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] decryptedPasswordBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedPass));
 
