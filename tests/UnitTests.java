@@ -5,7 +5,6 @@ import tools.HashTools;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Arrays;
 import java.util.Base64;
 
 import static org.junit.Assert.*;
@@ -13,12 +12,14 @@ import static org.junit.Assert.*;
 public class UnitTests {
     @Test
     public void testEncryption() throws Exception {
-        char[] masterPass = "TEST".toCharArray();
+        char[] masterPass = "12345678123456781234567812345678".toCharArray();
         String original = "Hello World!";
         byte[] salt = HashTools.generateSalt();
-        String encrypt = EncryptionTools.encryptPassword(masterPass, original.toCharArray(), salt);
-        char[] decrypt = EncryptionTools.decryptPassword(masterPass, encrypt, salt);
-        assertEquals(original, Arrays.toString(decrypt));
+        String encrypt = EncryptionTools.encryptUserPassword(masterPass, original.toCharArray(), salt);
+        System.out.println(encrypt);
+        char[] decrypt = EncryptionTools.decryptUserPassword(masterPass, encrypt, salt);
+        System.out.println(decrypt);
+        assertEquals(original, new String(decrypt));
     }
 
     @Test
@@ -55,5 +56,6 @@ public class UnitTests {
 
         // Print the decrypted plaintext
         System.out.println("Decrypted Text: " + decryptedText);
+        assertEquals(decryptedText, plaintext);
     }
 }

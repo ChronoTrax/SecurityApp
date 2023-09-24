@@ -60,8 +60,7 @@ public class HashTools {
      */
     public static byte[] generateSalt() {
         byte[] salt = new byte[16];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(salt);
+        new SecureRandom().nextBytes(salt);
         return salt;
     }
 
@@ -75,8 +74,10 @@ public class HashTools {
      * @throws NoSuchAlgorithmException error while accessing/reading information in the file
      * @throws InvalidKeySpecException Invalid encoding, wrong length, uninitialized
      */
-    public static byte[] hashPassword(char[] password, byte[] salt, int iterations, int keyLength)
+    public static byte[] hashPassword(char[] password, byte[] salt)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
+        int iterations = 10000;
+        int keyLength = 256;
         PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyLength);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         return factory.generateSecret(spec).getEncoded();

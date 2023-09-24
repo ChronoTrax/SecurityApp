@@ -1,5 +1,7 @@
 package gui;
 
+import tools.HashTools;
+
 import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,12 +33,18 @@ public class NewMasterPasswordGUI extends JFrame {
 
                 // write to file
                 try {
+                    // hash password for saving
+                    byte[] salt = HashTools.generateSalt();
+                    byte[] hash = HashTools.hashPassword(newPass, salt);
+
                     File file = new File("masterpass.txt");
 
                     FileWriter fileWriter = new FileWriter(file);
                     BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-                    bufferedWriter.write(newPass);
+                    bufferedWriter.write(Arrays.toString(hash));
+                    bufferedWriter.newLine();
+                    bufferedWriter.write(Arrays.toString(salt));
 
                     bufferedWriter.close();
                 } catch (Exception exc) {

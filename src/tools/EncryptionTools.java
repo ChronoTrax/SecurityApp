@@ -3,12 +3,14 @@ package tools;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
 public class EncryptionTools {
-    private static final String ENCRYPTION_ALGORITHM = "AES";
+    private static final String ENCRYPTION_ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA256";
     private static final int KEY_LENGTH = 256; // Key size in bits
     private static final int ITERATIONS = 10000; // Number of iterations, can change
@@ -23,15 +25,14 @@ public class EncryptionTools {
      */
     public static String encryptUserPassword(char[] masterPass, char[] userPass, byte[] salt) throws Exception {
         // Convert char[] password to byte[] for later use
-        byte[] masterPasswordBytes = new String(masterPass).getBytes();
         byte[] userPasswordBytes = new String(userPass).getBytes();
 
-        KeySpec masterKeySpec = new PBEKeySpec(masterPass, salt, ITERATIONS, KEY_LENGTH);
         SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
-        SecretKey masterKey = factory.generateSecret(masterKeySpec);
+        KeySpec masterKeySpec = new PBEKeySpec(masterPass, salt, ITERATIONS, KEY_LENGTH);
+        SecretKey masterKey = new SecretKeySpec(factory.generateSecret(masterKeySpec).getEncoded(), "AES");
 
         Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, masterKey);
+        cipher.init(Cipher.ENCRYPT_MODE, masterKey, new IvParameterSpec(salt));
 
         byte[] encryptedPassword = cipher.doFinal(userPasswordBytes);
 
@@ -50,12 +51,12 @@ public class EncryptionTools {
         // Convert char[] master password to byte[]
         byte[] masterPassBytes = new String(masterPass).getBytes();
 
-        KeySpec masterKeySpec = new PBEKeySpec(encryptedUserPass.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
         SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
-        SecretKey masterKey = factory.generateSecret(masterKeySpec);
+        KeySpec masterKeySpec = new PBEKeySpec(masterPass, salt, ITERATIONS, KEY_LENGTH);
+        SecretKey masterKey = new SecretKeySpec(factory.generateSecret(masterKeySpec).getEncoded(), "AES");
 
         Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, masterKey);
+        cipher.init(Cipher.DECRYPT_MODE, masterKey, new IvParameterSpec(salt));
 
         byte[] decryptedPasswordBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedUserPass));
 
