@@ -136,8 +136,8 @@ public class SavingTools {
         ps.execute();
     }
 
-    // improve method name
-    public static void getHashAndSalt() {
+    // TODO: Remove
+/*    public static void getHashAndSalt() {
         String password = "";
         byte[] salt = generateSalt();
 
@@ -153,21 +153,7 @@ public class SavingTools {
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
-    }
-
-    public static byte[] generateSalt() {
-        byte[] salt = new byte[16];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(salt);
-        return salt;
-    }
-
-    public static byte[] hashPassword(char[] password, byte[] salt, int iterations, int keyLength)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyLength);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        return factory.generateSecret(spec).getEncoded();
-    }
+    }*/
 
     public record PasswordRecord(String website, String username, String encryptedPass) {
         @Override

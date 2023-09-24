@@ -1,11 +1,15 @@
 package tools;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 
 public class HashTools {
 
@@ -48,5 +52,33 @@ public class HashTools {
         }
 
         return hexString.toString();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static byte[] generateSalt() {
+        byte[] salt = new byte[16];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(salt);
+        return salt;
+    }
+
+    /**
+     *
+     * @param password
+     * @param salt
+     * @param iterations
+     * @param keyLength
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     */
+    public static byte[] hashPassword(char[] password, byte[] salt, int iterations, int keyLength)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyLength);
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        return factory.generateSecret(spec).getEncoded();
     }
 }
