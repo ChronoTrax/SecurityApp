@@ -55,8 +55,8 @@ public class HashTools {
     }
 
     /**
-     *
-     * @return
+     * Generates a (secure)random salt when called
+     * @return byte[]
      */
     public static byte[] generateSalt() {
         byte[] salt = new byte[16];
@@ -67,13 +67,13 @@ public class HashTools {
 
     /**
      *
-     * @param password
-     * @param salt
-     * @param iterations
-     * @param keyLength
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeySpecException
+     * @param password User's password
+     * @param salt A random salt
+     * @param iterations How many times the encryption gets run
+     * @param keyLength Max length of password
+     * @return byte[]
+     * @throws NoSuchAlgorithmException error while accessing/reading information in the file
+     * @throws InvalidKeySpecException Invalid encoding, wrong length, uninitialized
      */
     public static byte[] hashPassword(char[] password, byte[] salt, int iterations, int keyLength)
             throws NoSuchAlgorithmException, InvalidKeySpecException {

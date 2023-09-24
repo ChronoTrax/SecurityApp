@@ -15,10 +15,11 @@ public class EncryptionTools {
 
     /**
      *
-     * @param pass
-     * @param salt
-     * @return
-     * @throws Exception
+     * @param  masterPass Master password of user
+     * @param pass Password for current site
+     * @param salt A randomly generated salt
+     * @return char[]
+     * @throws Exception could be illegal block size, padding, or {@link java.security.NoSuchAlgorithmException}
      */
     public static String encryptPassword(char[] masterPass, char[] pass, byte[] salt) throws Exception {
         // Convert char[] password to byte[] for later use
@@ -37,10 +38,11 @@ public class EncryptionTools {
 
     /**
      *
-     * @param encryptedPass
-     * @param salt
-     * @return
-     * @throws Exception
+     * @param masterPass Master password for user
+     * @param encryptedPass Password for current site
+     * @param salt A randomly generated salt
+     * @return char[]
+     * @throws Exception could be illegal block size, padding, or {@link java.security.NoSuchAlgorithmException}
      */
     public static char[] decryptPassword(char[] masterPass, String encryptedPass, byte[] salt) throws Exception {
         // Convert char[] master password to byte[]
