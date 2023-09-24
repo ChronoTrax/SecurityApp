@@ -13,9 +13,9 @@ import java.util.Base64;
 public class SavingTools {
     private static final String DB_NAME = "jdbc:sqlite:passDB.sqlite";
     private static final Connection CONNECTION;
-    private static final String CREATE_DATABASE = "create table if not exists Passwords (website varchar(150) not null primary key, username varchar(50) not null, encryptedPass varchar(300) not null);";
+    private static final String CREATE_DATABASE = "create table if not exists Passwords (website varchar(150) not null primary key, username varchar(50) not null, encryptedPass varchar(300) not null, salt varchar(16));";
     private static final String DROP_DATABASE = "drop table if exists Passwords;";
-    private static final String INSERT_PASSWORD_RECORD = "insert into Passwords values (?, ?, ?);";
+    private static final String INSERT_PASSWORD_RECORD = "insert into Passwords values (?, ?, ?, ?);";
     private static final String SELECT_PASSWORD_RECORDS = "select * from Passwords;";
     private static final String DELETE_PASSWORD_RECORD = "delete from Passwords where website = ?;";
 
@@ -28,11 +28,11 @@ public class SavingTools {
         }
     }
 
-    public static boolean savePassword(char[] masterPassword, String website, String username, String password) throws SQLException {
+    public static boolean savePassword(String website, String username, char[] password) throws Exception {
         // check null or blank
         if (website == null || website.isBlank() ||
                 username == null || username.isBlank() ||
-                password == null || password.isBlank()) {
+                password == null || password.length == 0) {
             throw new RuntimeException("Website, username, and password cannot be blank.");
         }
 
@@ -46,9 +46,11 @@ public class SavingTools {
             throw new RuntimeException("Username cannot be longer than 50 character.");
         }
 
+        // generate salt
+        byte[] salt = HashTools.generateSalt();
+
         // encrypt password
-        //TODO: encrypt password
-        String encryptedPass = password + Arrays.toString(masterPassword);
+        String encryptedPass = EncryptionTools.encryptPassword(password, salt);
 
         // make sure table exists
         createTables();
@@ -58,12 +60,13 @@ public class SavingTools {
         ps.setString(1, website);
         ps.setString(2, username);
         ps.setString(3, encryptedPass);
+        ps.setBytes(4, salt);
         ps.execute();
 
         return true;
     }
 
-    public static PasswordRecord findPasswordRecordWithWebsite(String website) throws SQLException {
+    public static PasswordRecord findPasswordRecordWithWebsite(String website) throws Exception {
         // get list
         ArrayList<PasswordRecord> list = getPasswordRecords();
 
@@ -77,7 +80,7 @@ public class SavingTools {
         return null;
     }
 
-    public static PasswordRecord findPasswordRecordWithUsername(String username) throws SQLException {
+    public static PasswordRecord findPasswordRecordWithUsername(String username) throws Exception {
         // get list
         ArrayList<PasswordRecord> list = getPasswordRecords();
 
@@ -110,7 +113,7 @@ public class SavingTools {
         return true;
     }
 
-    private static ArrayList<PasswordRecord> getPasswordRecords() throws SQLException {
+    private static ArrayList<PasswordRecord> getPasswordRecords() throws Exception {
         PreparedStatement ps = CONNECTION.prepareStatement(SELECT_PASSWORD_RECORDS);
         ps.execute();
         ResultSet rs = ps.getResultSet();
@@ -120,9 +123,12 @@ public class SavingTools {
 
         // loop through select results
         while (rs.next()) {
+            // decrypt password
+            String pass = EncryptionTools.decryptPassword(rs.getString("encryptedPass").toCharArray(), rs.getString("salt").getBytes());
+
             // create new Record
             PasswordRecord record = new PasswordRecord(rs.getString("website"),
-                    rs.getString("username"), rs.getString("encryptedPass"));
+                    rs.getString("username"), pass);
 
             list.add(record);
         }
