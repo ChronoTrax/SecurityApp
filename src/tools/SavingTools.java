@@ -46,7 +46,7 @@ public class SavingTools {
         byte[] salt = HashTools.generateSalt();
 
         // encrypt password
-        String encryptedPass = EncryptionTools.encryptPassword(MainGUI.masterPassword, password, salt);
+        String encryptedPass = EncryptionTools.encryptUserPassword(MainGUI.masterPassword, password, salt);
 
         // make sure table exists
         createTables();
@@ -120,7 +120,7 @@ public class SavingTools {
         // loop through select results
         while (rs.next()) {
             // decrypt password
-            char[] pass = EncryptionTools.decryptPassword(MainGUI.masterPassword, rs.getString("encryptedPass"), rs.getString("salt").getBytes());
+            char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, rs.getString("encryptedPass"), rs.getString("salt").getBytes());
 
             // create new Record
             PasswordRecord record = new PasswordRecord(rs.getString("website"),
