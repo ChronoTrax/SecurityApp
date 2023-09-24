@@ -84,7 +84,7 @@
               <toolTipText value="Upload a file"/>
             </properties>
           </component>
-          <component id="2c4c" class="javax.swing.JButton" binding="uploadFileBtn">
+          <component id="2c4c" class="javax.swing.JButton" binding="hashFileBtn">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -92,7 +92,7 @@
               <text value="Upload File"/>
             </properties>
           </component>
-          <component id="bef6" class="javax.swing.JTextArea" binding="hashField">
+          <component id="bef6" class="javax.swing.JTextArea" binding="hashResultField">
             <constraints>
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="50"/>

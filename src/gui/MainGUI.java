@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 public class MainGUI extends JFrame {
+    public static char[] masterPassword = null;
     private JPanel mainPanel;
     private JPanel passwordTestPanel;
     private JPanel hashPanel;
@@ -27,8 +28,8 @@ public class MainGUI extends JFrame {
     private JTextField saveUsernameField;
     private JTextField savePasswordField;
     private JButton savePasswordBtn;
-    private JTextArea hashField;
-    private JButton uploadFileBtn;
+    private JTextArea hashResultField;
+    private JButton hashFileBtn;
     private JTextField loadWebsiteSearchField;
     private JButton loadWebsiteSearchBtn;
     private JTextField loadUsernameSearchField;
@@ -36,12 +37,7 @@ public class MainGUI extends JFrame {
     private JTextArea loadPasswordResultField;
     private JButton deleteLoadedPasswordBtn;
     private JButton deleteDatabaseBtn;
-
-
     private SavingTools.PasswordRecord loadedPasswordRecord = null;
-
-
-    public static char[] masterPassword = null;
 
 
     public MainGUI() {
@@ -57,140 +53,158 @@ public class MainGUI extends JFrame {
         // ask for master password
         promptMasterPassword();
 
-        // test password button
+        // test password
         submitPasswordTestBtn.addActionListener(e -> testPassword());
+        passwordTestInputField.addActionListener(e -> testPassword());
 
-        // generate password button
+        // generate password
         genPasswordBtn.addActionListener(e -> generatePassword());
 
-        // save password button
-        savePasswordBtn.addActionListener(e -> {
+        // save password
+        savePasswordBtn.addActionListener(e -> savePassword());
+        saveWebsiteField.addActionListener(e -> savePassword());
+        saveUsernameField.addActionListener(e -> savePassword());
+        savePasswordField.addActionListener(e -> savePassword());
+
+        // load password with website search
+        loadWebsiteSearchBtn.addActionListener(e -> searchWebsite());
+        loadWebsiteSearchField.addActionListener(e -> searchWebsite());
+
+        // load password with username search
+        loadUsernameSearchBtn.addActionListener(e -> searchUsername());
+        loadUsernameSearchField.addActionListener(e -> searchUsername());
+
+        // delete loaded password
+        deleteLoadedPasswordBtn.addActionListener(e -> deletePassword());
+
+        // delete database
+        deleteDatabaseBtn.addActionListener(e -> deleteDatabase());
+
+        // upload file for hashing
+        hashFileBtn.addActionListener(e -> hashFile());
+    }
+
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
+        new MainGUI();
+    }
+
+    private void hashFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+
             try {
-                // check for master password
-                if (masterPassword == null) {
-                    promptMasterPassword();
-                    return;
-                }
+                //hashResultField.setLineWrap(true);
 
-                // get user inputs
-                String website = saveWebsiteField.getText();
-                String username = saveUsernameField.getText();
-                String password = savePasswordField.getText();
+                String md5 = HashTools.getMD5(selectedFile.getAbsolutePath());
+                hashResultField.setText("MD5 Hash: " + md5 + "\n");
 
-                // try saving password to database
-                if (SavingTools.savePassword(masterPassword, website, username, password)) {
-                    JOptionPane.showMessageDialog(mainPanel, "Saved password.",
+                String sha256 = HashTools.calculateSHA256(selectedFile.getAbsolutePath());
+                hashResultField.append("SHA-256 Hash: " + sha256);
+            } catch (IOException | NoSuchAlgorithmException exc) {
+                JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                exc.getClass() + "\n" + exc.getMessage(),
+                        "Error!", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } else {
+            System.out.println("No file selected. ");
+        }
+    }
+
+    private void deleteDatabase() {
+        int choice = JOptionPane.showConfirmDialog(mainPanel,
+                "Are you sure you want to delete all saved passwords?",
+                "Confirmation", JOptionPane.YES_NO_OPTION);
+
+        if (choice == JOptionPane.YES_OPTION) {
+            try {
+                if (SavingTools.deletePasswordDatabase()) {
+                    JOptionPane.showMessageDialog(mainPanel, "Deleted saved passwords.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
 
-                    // clear input fields
-                    saveWebsiteField.setText("");
-                    saveUsernameField.setText("");
-                    savePasswordField.setText("");
+                    // clear password field
+                    loadPasswordResultField.setText("");
+
+                    // reset loaded password
+                    loadedPasswordRecord = null;
                 }
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                 exc.getClass() + "\n" + exc.getMessage(),
                         "Error!", JOptionPane.ERROR_MESSAGE);
             }
-        });
+        }
+    }
 
-        // load password with website search
-        loadWebsiteSearchBtn.addActionListener(e -> searchWebsite());
+    private void deletePassword() {
+        if (loadedPasswordRecord == null) {
+            JOptionPane.showMessageDialog(mainPanel, "No password has been loaded yet.",
+                    "Error!", JOptionPane.ERROR_MESSAGE);
 
-        // load password with username search
-        loadUsernameSearchBtn.addActionListener(e -> searchUsername());
+            return;
+        }
 
-        // delete loaded password
-        deleteLoadedPasswordBtn.addActionListener(e -> {
-            if (loadedPasswordRecord == null) {
-                JOptionPane.showMessageDialog(mainPanel, "No password has been loaded yet.",
+        int choice = JOptionPane.showConfirmDialog(mainPanel,
+                "Are you sure you want to delete password for: " + loadedPasswordRecord.website() + "?",
+                "Confirmation", JOptionPane.YES_NO_OPTION);
+
+        if (choice == JOptionPane.YES_OPTION) {
+            try {
+                if (SavingTools.deletePasswordRecord(loadedPasswordRecord.website())) {
+                    JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
+                            "Saved", JOptionPane.INFORMATION_MESSAGE);
+
+                    // clear password field
+                    loadPasswordResultField.setText("");
+
+                    // reset loaded password
+                    loadedPasswordRecord = null;
+                }
+            } catch (Exception exc) {
+                JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                                exc.getClass() + "\n" + exc.getMessage(),
                         "Error!", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 
+    private void savePassword() {
+        try {
+            // check for master password
+            if (masterPassword == null) {
+                promptMasterPassword();
                 return;
             }
 
-            int choice = JOptionPane.showConfirmDialog(mainPanel,
-                    "Are you sure you want to delete password for: " + loadedPasswordRecord.website() + "?",
-                    "Confirmation", JOptionPane.YES_NO_OPTION);
+            // get user inputs
+            String website = saveWebsiteField.getText();
+            String username = saveUsernameField.getText();
+            String password = savePasswordField.getText();
 
-            if (choice == JOptionPane.YES_OPTION) {
-                try {
-                    if (SavingTools.deletePasswordRecord(loadedPasswordRecord.website())) {
-                        JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
-                                "Saved", JOptionPane.INFORMATION_MESSAGE);
+            // try saving password to database
+            if (SavingTools.savePassword(masterPassword, website, username, password)) {
+                JOptionPane.showMessageDialog(mainPanel, "Saved password.",
+                        "Saved", JOptionPane.INFORMATION_MESSAGE);
 
-                        // clear password field
-                        loadPasswordResultField.setText("");
-
-                        // reset loaded password
-                        loadedPasswordRecord = null;
-                    }
-                } catch (Exception exc) {
-                    JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
-                                    exc.getClass() + "\n" + exc.getMessage(),
-                            "Error!", JOptionPane.ERROR_MESSAGE);
-                }
+                // clear input fields
+                saveWebsiteField.setText("");
+                saveUsernameField.setText("");
+                savePasswordField.setText("");
             }
-        });
-
-        deleteDatabaseBtn.addActionListener(e -> {
-            int choice = JOptionPane.showConfirmDialog(mainPanel,
-                    "Are you sure you want to delete all saved passwords?",
-                    "Confirmation", JOptionPane.YES_NO_OPTION);
-
-            if (choice == JOptionPane.YES_OPTION) {
-                try {
-                    if (SavingTools.deletePasswordDatabase()) {
-                        JOptionPane.showMessageDialog(mainPanel, "Deleted saved passwords.",
-                                "Saved", JOptionPane.INFORMATION_MESSAGE);
-
-                        // clear password field
-                        loadPasswordResultField.setText("");
-
-                        // reset loaded password
-                        loadedPasswordRecord = null;
-                    }
-                } catch (Exception exc) {
-                    JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
-                                    exc.getClass() + "\n" + exc.getMessage(),
-                            "Error!", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        // upload file button
-        uploadFileBtn.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            int returnValue = fileChooser.showOpenDialog(null);
-
-            if (returnValue == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-
-                try {
-                    //hashField.setLineWrap(true);
-
-                    String md5 = HashTools.getMD5(selectedFile.getAbsolutePath());
-                    hashField.setText("MD5 Hash: " + md5 + "\n");
-
-                    String sha256 = HashTools.calculateSHA256(selectedFile.getAbsolutePath());
-                    hashField.append("SHA-256 Hash: " + sha256);
-                } catch (IOException | NoSuchAlgorithmException exc) {
-                    JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
-                                    exc.getClass() + "\n" + exc.getMessage(),
-                            "Error!", JOptionPane.ERROR_MESSAGE);
-                }
-
-            } else {
-                System.out.println("No file selected. ");
-            }
-
-        });
-
-        passwordTestInputField.addActionListener(e -> testPassword());
-
-        loadWebsiteSearchField.addActionListener(e -> searchWebsite());
-
-        loadUsernameSearchField.addActionListener(e -> searchUsername());
+        } catch (Exception exc) {
+            JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
+                            exc.getClass() + "\n" + exc.getMessage(),
+                    "Error!", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void searchUsername() {
@@ -292,15 +306,5 @@ public class MainGUI extends JFrame {
                             exc.getClass() + "\n" + exc.getMessage(),
                     "Error!", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                 UnsupportedLookAndFeelException e) {
-            throw new RuntimeException(e);
-        }
-        new MainGUI();
     }
 }
