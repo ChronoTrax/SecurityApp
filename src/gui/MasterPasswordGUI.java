@@ -42,36 +42,52 @@ public class MasterPasswordGUI extends JFrame {
                 FileReader fileReader = new FileReader(file);
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-                byte[] hash = new byte[32];
-                byte[] readHash = bufferedReader.readLine().getBytes();
+                String inputLine = bufferedReader.readLine();
 
-                // master password has not been set up
-                if (readHash.length == 0) {
-                    JOptionPane.showMessageDialog(mainPanel, "Master password is missing. Please input a new master password.",
-                            "Master Password Missing", JOptionPane.INFORMATION_MESSAGE);
+                // Remove square brackets and spaces
+                String cleanString = inputLine.replaceAll("[\\[\\] ]", "");
 
-                    new NewMasterPasswordGUI();
-                    dispose();
-                    return;
+                // Split the string into individual decimal values
+                String[] decimalValues = cleanString.split(",");
+
+                // Create a byte array and populate it with parsed values
+                byte[] hash = new byte[decimalValues.length];
+                for (int i = 0; i < decimalValues.length; i++) {
+                    hash[i] = (byte) Integer.parseInt(decimalValues[i].trim());
                 }
 
-                for (int i = 0; i < 32; i++) {
-                    byte b = readHash[i];
-                    if (b != ',' && b != '[' && b != ']') {
-                        // Convert the byte to a character and process it
-                        hash[i] = b;
-                    }
+                // Display the byte array
+                for (byte b : hash) {
+                    System.out.print(b + " ");
                 }
 
-                byte[] salt = new byte[16];
-                byte[] readSalt = bufferedReader.readLine().getBytes();
+//                // master password has not been set up
+//                if (readHash.length == 0) {
+//                    JOptionPane.showMessageDialog(mainPanel, "Master password is missing. Please input a new master password.",
+//                            "Master Password Missing", JOptionPane.INFORMATION_MESSAGE);
+//
+//                    new NewMasterPasswordGUI();
+//                    dispose();
+//                    return;
+//                }
 
-                for (int i = 0; i < 16; i++) {
-                    byte b = readSalt[i];
-                    if (b != ',' && b != '[' && b != ']') {
-                        // Convert the byte to a character and process it
-                        salt[i] = b;
-                    }
+                inputLine = bufferedReader.readLine();
+
+                // Remove square brackets and spaces
+                cleanString = inputLine.replaceAll("[\\[\\] ]", "");
+
+                // Split the string into individual decimal values
+                decimalValues = cleanString.split(",");
+
+                // Create a byte array and populate it with parsed values
+                byte[] salt = new byte[decimalValues.length];
+                for (int i = 0; i < decimalValues.length; i++) {
+                    salt[i] = (byte) Integer.parseInt(decimalValues[i].trim());
+                }
+
+                // Display the byte array
+                for (byte b : salt) {
+                    System.out.print(b + " ");
                 }
 
                 bufferedReader.close();
