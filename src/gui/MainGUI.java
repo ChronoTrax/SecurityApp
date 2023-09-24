@@ -48,7 +48,7 @@ public class MainGUI extends JFrame {
         // setup panel
         setContentPane(mainPanel);
         setTitle("Security App");
-        setSize(800, 450);
+        setSize(1200, 675);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // reveal window
