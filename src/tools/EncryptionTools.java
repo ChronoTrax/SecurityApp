@@ -21,17 +21,18 @@ public class EncryptionTools {
      * @return
      * @throws Exception
      */
-    public static String encryptPassword(char[] pass, String salt) throws Exception {
+    public static String encryptPassword(char[] masterPass, char[] pass, byte[] salt) throws Exception {
         // Convert char[] password to byte[] for later use
         byte[] passwordBytes = new String(pass).getBytes();
 
-        KeySpec spec = new PBEKeySpec(pass, salt.getBytes(), ITERATIONS, KEY_LENGTH);
+        KeySpec spec = new PBEKeySpec(masterPass, salt, ITERATIONS, KEY_LENGTH);
         SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
         SecretKey key = factory.generateSecret(spec);
 
         Cipher cipher = Cipher.getInstance(ENCRYTPION_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] encryptedPassword = cipher.doFinal(passwordBytes);
+
         return Base64.getEncoder().encodeToString(encryptedPassword);
     }
 
@@ -42,8 +43,11 @@ public class EncryptionTools {
      * @return
      * @throws Exception
      */
-    public static char[] decryptPassword(String encryptedPass, String salt) throws Exception {
-        KeySpec spec = new PBEKeySpec(encryptedPass.toCharArray(), salt.getBytes(), ITERATIONS, KEY_LENGTH);
+    public static char[] decryptPassword(char[] masterPass, String encryptedPass, byte[] salt) throws Exception {
+        // Convert char[] master password to byte[]
+        byte[] masterPassBytes = new String(masterPass).getBytes();
+
+        KeySpec spec = new PBEKeySpec(encryptedPass.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
         SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
         SecretKey key = factory.generateSecret(spec);
 
