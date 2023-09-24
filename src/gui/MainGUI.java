@@ -26,7 +26,7 @@ public class MainGUI extends JFrame {
     private JTextArea genPasswordField;
     private JTextField saveWebsiteField;
     private JTextField saveUsernameField;
-    private JTextField savePasswordField;
+    private JPasswordField savePasswordField;
     private JButton savePasswordBtn;
     private JTextArea hashResultField;
     private JButton hashFileBtn;
@@ -95,6 +95,7 @@ public class MainGUI extends JFrame {
     }
 
     private void hashFile() {
+        // let user select file
         JFileChooser fileChooser = new JFileChooser();
         int returnValue = fileChooser.showOpenDialog(null);
 
@@ -102,11 +103,11 @@ public class MainGUI extends JFrame {
             File selectedFile = fileChooser.getSelectedFile();
 
             try {
-                //hashResultField.setLineWrap(true);
-
-                String md5 = HashTools.getMD5(selectedFile.getAbsolutePath());
+                // MD5 hash
+                String md5 = HashTools.calculateMD5(selectedFile.getAbsolutePath());
                 hashResultField.setText("MD5 Hash: " + md5 + "\n");
 
+                // sha256 hash
                 String sha256 = HashTools.calculateSHA256(selectedFile.getAbsolutePath());
                 hashResultField.append("SHA-256 Hash: " + sha256);
             } catch (IOException | NoSuchAlgorithmException exc) {
@@ -188,10 +189,10 @@ public class MainGUI extends JFrame {
             // get user inputs
             String website = saveWebsiteField.getText();
             String username = saveUsernameField.getText();
-            String password = savePasswordField.getText();
+            char[] password = savePasswordField.getPassword();
 
             // try saving password to database
-            if (SavingTools.savePassword(masterPassword, website, username, password)) {
+            if (SavingTools.savePassword(website, username, password)) {
                 JOptionPane.showMessageDialog(mainPanel, "Saved password.",
                         "Saved", JOptionPane.INFORMATION_MESSAGE);
 

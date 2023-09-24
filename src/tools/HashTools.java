@@ -22,7 +22,7 @@ public class HashTools {
      * @throws IOException                  error while accessing/reading information in the file
      * @throws NoSuchAlgorithmException     when an algorithm is requested but not available
      */
-    public static String getMD5(String filepath) throws IOException, NoSuchAlgorithmException {
+    public static String calculateMD5(String filepath) throws IOException, NoSuchAlgorithmException {
         byte[] data = Files.readAllBytes(Paths.get(filepath));
         byte[] hash = MessageDigest.getInstance("MD5").digest(data);
 
