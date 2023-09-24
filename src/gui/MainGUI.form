@@ -58,7 +58,7 @@
             </constraints>
             <properties>
               <editable value="false"/>
-              <font name="Arial" size="14"/>
+              <font name="Arial" size="18"/>
             </properties>
           </component>
         </children>
@@ -68,7 +68,9 @@
         <constraints>
           <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
-        <properties/>
+        <properties>
+          <font size="16"/>
+        </properties>
         <border type="line">
           <color color="-16777216"/>
         </border>
@@ -84,7 +86,7 @@
           </component>
           <component id="2c4c" class="javax.swing.JButton" binding="uploadFileBtn">
             <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Upload File"/>
@@ -318,7 +320,7 @@
             </constraints>
             <properties>
               <editable value="false"/>
-              <font name="Arial" size="14"/>
+              <font name="Arial" size="18"/>
             </properties>
           </component>
         </children>

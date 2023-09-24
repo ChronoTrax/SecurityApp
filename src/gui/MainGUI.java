@@ -167,6 +167,8 @@ public class MainGUI extends JFrame {
                 File selectedFile = fileChooser.getSelectedFile();
 
                 try {
+                    //hashField.setLineWrap(true);
+
                     String md5 = HashTools.getMD5(selectedFile.getAbsolutePath());
                     hashField.setText("MD5 Hash: " + md5 + "\n");
 
