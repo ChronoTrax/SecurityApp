@@ -16,13 +16,17 @@ public class DatabaseTools {
 
     private static final Connection CONNECTION;
 
-    private static final String CREATE_DATABASE = "create table if not exists Passwords (website varchar(150) not null primary key, username varchar(50) not null, encryptedPass varchar(300) not null, salt varchar(16));";
+    private static final String CREATE_PASSWORD_TABLE = "create table if not exists Passwords " +
+            "(website varchar(150) not null, username varchar(50) not null, encryptedPassword varchar(300) not null, " +
+            "salt varchar(16), primary key (website, username));";
 
     private static final String DROP_DATABASE = "drop table if exists Passwords;";
 
     private static final String INSERT_PASSWORD_RECORD = "insert into Passwords values (?, ?, ?, ?);";
 
     private static final String SELECT_PASSWORD_RECORDS = "select * from Passwords;";
+
+    private static final String SELECT_WEBSITE_AND_USERNAME = "select website, username from Passwords;";
 
     private static final String DELETE_PASSWORD_RECORD = "delete from Passwords where website = ? and username = ?;";
 
@@ -48,26 +52,38 @@ public class DatabaseTools {
      * @throws InvalidKeyException
      * @throws SQLException
      */
-    public static boolean savePassword(AccountRecord record)
+    public static void savePassword(AccountRecord record)
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException,
-            NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, SQLException {
+            NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, SQLException, DuplicateAccountException {
+        // make sure table exists
+        createPasswordsTable();
+
+        // check for duplicate website and username
+        PreparedStatement ps = CONNECTION.prepareStatement(SELECT_WEBSITE_AND_USERNAME);
+        ps.execute();
+        ResultSet rs = ps.getResultSet();
+
+        // loop through select results
+        while (rs.next()) {
+            if (record.website.equals(rs.getString("website")) && record.username.equals(rs.getString("username"))) {
+                throw new DuplicateAccountException("Duplicate account.");
+            }
+        }
+
         // generate salt
         byte[] salt = EncryptionTools.generateSalt();
 
         // encrypt password
         char[] encryptedPass = EncryptionTools.encryptUserPassword(MainGUI.masterPassword, record.password, salt);
 
-        // make sure table exists
-        createPasswordsTable();
-
         // add to database
-        PreparedStatement ps = CONNECTION.prepareStatement(INSERT_PASSWORD_RECORD);
+        ps = CONNECTION.prepareStatement(INSERT_PASSWORD_RECORD);
         ps.setString(1, record.website);
         ps.setString(2, record.username);
         ps.setString(3, new String(encryptedPass));
         ps.setBytes(4, salt);
 
-        return ps.execute();
+        ps.execute();
     }
 
     /**
@@ -199,14 +215,20 @@ public class DatabaseTools {
      */
     private static void createPasswordsTable() throws SQLException {
         // create tables
-        PreparedStatement ps = CONNECTION.prepareStatement(CREATE_DATABASE);
+        PreparedStatement ps = CONNECTION.prepareStatement(CREATE_PASSWORD_TABLE);
         ps.execute();
+    }
+
+    public static class DuplicateAccountException extends Exception {
+        public DuplicateAccountException(String s) {
+            super(s);
+        }
     }
 
     /**
      * Record to contain un-encrypted password information.
      *
-     * @param website {@link String} name of website.
+     * @param website  {@link String} name of website.
      * @param username {@link String} username of account.
      * @param password {@link String} password of account.
      */

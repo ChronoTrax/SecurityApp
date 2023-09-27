@@ -28,20 +28,27 @@ public class NewMasterPasswordGUI extends JFrame {
 
         submitPasswordBtn.addActionListener(e -> {
             if (Arrays.equals(newPasswordField.getPassword(), confirmPasswordField.getPassword())) {
-                char[] newPass = newPasswordField.getPassword();
+                char[] inputPassword = newPasswordField.getPassword();
 
-                MainGUI.masterPassword = newPass;
+                // validate password
+                if (inputPassword.length == 0) {
+                    JOptionPane.showMessageDialog(mainPanel, "Password cannot be blank.","Error!",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                MainGUI.masterPassword = inputPassword;
 
                 // write to file
-                try (FileChannel channel = FileChannel.open(Paths.get(MainGUI.masterPasswordFilePath), StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+                try (FileChannel channel = FileChannel.open(Paths.get(MainGUI.masterPasswordFilePath),
+                        StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
                     // hash password for saving
-                    byte[] hash = EncryptionTools.hashPassword(newPass);
+                    byte[] hash = EncryptionTools.hashPassword(inputPassword);
 
-                    channel.write(ByteBuffer.wrap(hash));
+                    int bytesWritten = channel.write(ByteBuffer.wrap(hash));
                 } catch (Exception exc) {
                     JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
-                                    exc.getClass() + "\n" + exc.getMessage(),
-                            "Error!", JOptionPane.ERROR_MESSAGE);
+                                    exc.getClass() + "\n" + exc.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
                 }
 
                 // close panel

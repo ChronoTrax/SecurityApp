@@ -8,8 +8,7 @@ import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 public class MainGUI extends JFrame {
     public static final String masterPasswordFilePath = "masterpass.txt";
@@ -111,14 +110,14 @@ public class MainGUI extends JFrame {
                 // sha256 hash
                 String sha256 = EncryptionTools.calculateSHA256(selectedFile.getAbsolutePath());
                 hashResultField.append("SHA-256 Hash: " + sha256);
-            } catch (IOException | NoSuchAlgorithmException exc) {
+            } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                 exc.getClass() + "\n" + exc.getMessage(),
                         "Error!", JOptionPane.ERROR_MESSAGE);
             }
 
         } else {
-            System.out.println("No file selected. ");
+            System.out.println("No file selected.");
         }
     }
 
@@ -161,7 +160,7 @@ public class MainGUI extends JFrame {
 
         if (choice == JOptionPane.YES_OPTION) {
             try {
-                if (DatabaseTools.deletePasswordRecord(loadedAccountRecord.website())) {
+                if (DatabaseTools.deletePasswordRecord(loadedAccountRecord)) {
                     JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
 
@@ -193,18 +192,18 @@ public class MainGUI extends JFrame {
             char[] password = savePasswordField.getPassword();
 
             // try saving password to database
-            if (DatabaseTools.savePassword(new DatabaseTools.AccountRecord(website, username, password))) {
-                JOptionPane.showMessageDialog(mainPanel, "Saved password.",
-                        "Saved", JOptionPane.INFORMATION_MESSAGE);
+            DatabaseTools.savePassword(new DatabaseTools.AccountRecord(website, username, password));
+            JOptionPane.showMessageDialog(mainPanel, "Saved password.",
+                    "Saved", JOptionPane.INFORMATION_MESSAGE);
 
-                // clear input fields
-                saveWebsiteField.setText("");
-                saveUsernameField.setText("");
-                savePasswordField.setText("");
-            } else {
-                JOptionPane.showMessageDialog(mainPanel, "Could not save password.",
-                        "Error!", JOptionPane.ERROR_MESSAGE);
-            }
+            // clear input fields
+            saveWebsiteField.setText("");
+            saveUsernameField.setText("");
+            savePasswordField.setText("");
+
+        } catch (DatabaseTools.DuplicateAccountException exc) {
+            JOptionPane.showMessageDialog(mainPanel, "Duplicate account detected.",
+                    "Duplicate Account", JOptionPane.ERROR_MESSAGE);
         } catch (Exception exc) {
             JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                             exc.getClass() + "\n" + exc.getMessage(),
@@ -216,18 +215,27 @@ public class MainGUI extends JFrame {
         String username = loadUsernameSearchField.getText();
 
         try {
-            DatabaseTools.AccountRecord record = DatabaseTools.findPasswordRecordWithUsername(username);
-            if (record == null) {
+            ArrayList<DatabaseTools.AccountRecord> records = DatabaseTools.findPasswordRecordWithUsername(username);
+
+            if (records.isEmpty()) {
                 JOptionPane.showMessageDialog(mainPanel, "Could not find password for: " + username,
                         "Could Not find Password", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            loadPasswordResultField.setText(record.toString());
-            loadedAccountRecord = record;
+            StringBuilder sb = new StringBuilder();
 
-            // clear input fields
-            loadUsernameSearchField.setText("");
+            for (DatabaseTools.AccountRecord account :
+                    records) {
+                sb.append(account).append("\n");
+            }
+
+            loadPasswordResultField.setText(String.valueOf(sb));
+
+            // if only 1 result, allow deleting
+            if (records.size() == 1) {
+                loadedAccountRecord = records.get(0);
+            }
         } catch (Exception exc) {
             JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                             exc.getClass() + "\n" + exc.getMessage(),
@@ -239,18 +247,27 @@ public class MainGUI extends JFrame {
         String website = loadWebsiteSearchField.getText();
 
         try {
-            DatabaseTools.AccountRecord record = DatabaseTools.findPasswordRecordsWithWebsite(website);
-            if (record == null) {
+            ArrayList<DatabaseTools.AccountRecord> records = DatabaseTools.findPasswordRecordsWithWebsite(website);
+
+            if (records.isEmpty()) {
                 JOptionPane.showMessageDialog(mainPanel, "Could not find password for: " + website,
                         "Could Not find Password", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            loadPasswordResultField.setText(record.toString());
-            loadedAccountRecord = record;
+            StringBuilder sb = new StringBuilder();
 
-            // clear input fields
-            loadWebsiteSearchField.setText("");
+            for (DatabaseTools.AccountRecord account :
+                    records) {
+                sb.append(account).append("\n");
+            }
+
+            loadPasswordResultField.setText(String.valueOf(sb));
+
+            // if only 1 result, allow deleting
+            if (records.size() == 1) {
+                loadedAccountRecord = records.get(0);
+            }
         } catch (Exception exc) {
             JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                             exc.getClass() + "\n" + exc.getMessage(),

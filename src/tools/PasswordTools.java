@@ -14,7 +14,7 @@ public class PasswordTools {
      * letter, a number, and a special character.
      *
      * @param password the password to be tested.
-     * @return a String explaining the password's strength.
+     * @return {@link String} explaining the password's strength.
      */
     public static String isPasswordStrong(String password) {
         // check length
@@ -61,13 +61,14 @@ public class PasswordTools {
     /**
      * Generates a random password of length 8 - 16, with random letters, numbers, and special characters.
      *
-     * @return a randomized password String.
+     * @return a randomized password {@link String}.
      */
     public static String generatePassword() {
         Random rand = new Random();
 
         String allChars = lowercase + uppercase + numbers + specials;
 
+        // random length from 8-16
         int length = rand.nextInt(9) + 8;
 
         StringBuilder sb = new StringBuilder();
