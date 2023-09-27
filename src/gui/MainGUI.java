@@ -1,8 +1,8 @@
 package gui;
 
-import tools.HashTools;
+import tools.DatabaseTools;
+import tools.EncryptionTools;
 import tools.PasswordTools;
-import tools.SavingTools;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 public class MainGUI extends JFrame {
+    public static final String masterPasswordFilePath = "masterpass.txt";
+
     public static char[] masterPassword = null;
     private JPanel mainPanel;
     private JPanel passwordTestPanel;
@@ -37,7 +39,7 @@ public class MainGUI extends JFrame {
     private JTextArea loadPasswordResultField;
     private JButton deleteLoadedPasswordBtn;
     private JButton deleteDatabaseBtn;
-    private SavingTools.PasswordRecord loadedPasswordRecord = null;
+    private DatabaseTools.PasswordRecord loadedPasswordRecord = null;
 
 
     public MainGUI() {
@@ -104,11 +106,11 @@ public class MainGUI extends JFrame {
 
             try {
                 // MD5 hash
-                String md5 = HashTools.calculateMD5(selectedFile.getAbsolutePath());
+                String md5 = EncryptionTools.calculateMD5(selectedFile.getAbsolutePath());
                 hashResultField.setText("MD5 Hash: " + md5 + "\n");
 
                 // sha256 hash
-                String sha256 = HashTools.calculateSHA256(selectedFile.getAbsolutePath());
+                String sha256 = EncryptionTools.calculateSHA256(selectedFile.getAbsolutePath());
                 hashResultField.append("SHA-256 Hash: " + sha256);
             } catch (IOException | NoSuchAlgorithmException exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
@@ -128,7 +130,7 @@ public class MainGUI extends JFrame {
 
         if (choice == JOptionPane.YES_OPTION) {
             try {
-                if (SavingTools.deletePasswordDatabase()) {
+                if (DatabaseTools.deletePasswordDatabase()) {
                     JOptionPane.showMessageDialog(mainPanel, "Deleted saved passwords.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
 
@@ -160,7 +162,7 @@ public class MainGUI extends JFrame {
 
         if (choice == JOptionPane.YES_OPTION) {
             try {
-                if (SavingTools.deletePasswordRecord(loadedPasswordRecord.website())) {
+                if (DatabaseTools.deletePasswordRecord(loadedPasswordRecord.website())) {
                     JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
 
@@ -192,7 +194,7 @@ public class MainGUI extends JFrame {
             char[] password = savePasswordField.getPassword();
 
             // try saving password to database
-            if (SavingTools.savePassword(website, username, password)) {
+            if (DatabaseTools.savePassword(website, username, password)) {
                 JOptionPane.showMessageDialog(mainPanel, "Saved password.",
                         "Saved", JOptionPane.INFORMATION_MESSAGE);
 
@@ -212,7 +214,7 @@ public class MainGUI extends JFrame {
         String username = loadUsernameSearchField.getText();
 
         try {
-            SavingTools.PasswordRecord record = SavingTools.findPasswordRecordWithUsername(username);
+            DatabaseTools.PasswordRecord record = DatabaseTools.findPasswordRecordWithUsername(username);
             if (record == null) {
                 JOptionPane.showMessageDialog(mainPanel, "Could not find password for: " + username,
                         "Could Not find Password", JOptionPane.ERROR_MESSAGE);
@@ -235,7 +237,7 @@ public class MainGUI extends JFrame {
         String website = loadWebsiteSearchField.getText();
 
         try {
-            SavingTools.PasswordRecord record = SavingTools.findPasswordRecordWithWebsite(website);
+            DatabaseTools.PasswordRecord record = DatabaseTools.findPasswordRecordWithWebsite(website);
             if (record == null) {
                 JOptionPane.showMessageDialog(mainPanel, "Could not find password for: " + website,
                         "Could Not find Password", JOptionPane.ERROR_MESSAGE);

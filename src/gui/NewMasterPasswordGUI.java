@@ -1,11 +1,12 @@
 package gui;
 
-import tools.HashTools;
+import tools.EncryptionTools;
 
 import javax.swing.*;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 public class NewMasterPasswordGUI extends JFrame {
@@ -32,21 +33,11 @@ public class NewMasterPasswordGUI extends JFrame {
                 MainGUI.masterPassword = newPass;
 
                 // write to file
-                try {
+                try (FileChannel channel = FileChannel.open(Paths.get(MainGUI.masterPasswordFilePath), StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
                     // hash password for saving
-                    byte[] salt = HashTools.generateSalt();
-                    byte[] hash = HashTools.hashPassword(newPass, salt);
+                    byte[] hash = EncryptionTools.hashPassword(newPass);
 
-                    File file = new File("masterpass.txt");
-
-                    FileWriter fileWriter = new FileWriter(file);
-                    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-                    bufferedWriter.write(Arrays.toString(hash));
-                    bufferedWriter.newLine();
-                    bufferedWriter.write(Arrays.toString(salt));
-
-                    bufferedWriter.close();
+                    channel.write(ByteBuffer.wrap(hash));
                 } catch (Exception exc) {
                     JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
                                     exc.getClass() + "\n" + exc.getMessage(),

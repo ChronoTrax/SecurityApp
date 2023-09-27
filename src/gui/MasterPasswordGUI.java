@@ -1,11 +1,12 @@
 package gui;
 
-import tools.HashTools;
+import tools.EncryptionTools;
 
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 public class MasterPasswordGUI extends JFrame {
@@ -25,43 +26,24 @@ public class MasterPasswordGUI extends JFrame {
         setVisible(true);
 
         submitPasswordBtn.addActionListener(e -> {
-            try {
-                // check if master password has been set up yet
-                File file = new File("masterpass.txt");
-
+            try (FileChannel channel = FileChannel.open(Paths.get(MainGUI.masterPasswordFilePath), StandardOpenOption.READ)) {
                 // check if file exists
-                if (!file.exists()) {
-                    JOptionPane.showMessageDialog(mainPanel, "Master password file is missing. Please input a new master password.",
-                            "Master Password Missing", JOptionPane.INFORMATION_MESSAGE);
+//                if (!file.exists()) {
+//                    JOptionPane.showMessageDialog(mainPanel, "Master password file is missing. Please input a new master password.",
+//                            "Master Password Missing", JOptionPane.INFORMATION_MESSAGE);
+//
+//                    new NewMasterPasswordGUI();
+//                    dispose();
+//                    return;
+//                }
 
-                    new NewMasterPasswordGUI();
-                    dispose();
-                    return;
-                }
+                ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
+                channel.read(buffer);
 
-                FileReader fileReader = new FileReader(file);
-                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                // Convert the ByteBuffer to a byte array
+                byte[] readHash = buffer.array();
 
-                String inputLine = bufferedReader.readLine();
-
-                // Remove square brackets and spaces
-                String cleanString = inputLine.replaceAll("[\\[\\] ]", "");
-
-                // Split the string into individual decimal values
-                String[] decimalValues = cleanString.split(",");
-
-                // Create a byte array and populate it with parsed values
-                byte[] hash = new byte[decimalValues.length];
-                for (int i = 0; i < decimalValues.length; i++) {
-                    hash[i] = (byte) Integer.parseInt(decimalValues[i].trim());
-                }
-
-                // Display the byte array
-                for (byte b : hash) {
-                    System.out.print(b + " ");
-                }
-
-//                // master password has not been set up
+                // master password has not been set up
 //                if (readHash.length == 0) {
 //                    JOptionPane.showMessageDialog(mainPanel, "Master password is missing. Please input a new master password.",
 //                            "Master Password Missing", JOptionPane.INFORMATION_MESSAGE);
@@ -71,33 +53,12 @@ public class MasterPasswordGUI extends JFrame {
 //                    return;
 //                }
 
-                inputLine = bufferedReader.readLine();
-
-                // Remove square brackets and spaces
-                cleanString = inputLine.replaceAll("[\\[\\] ]", "");
-
-                // Split the string into individual decimal values
-                decimalValues = cleanString.split(",");
-
-                // Create a byte array and populate it with parsed values
-                byte[] salt = new byte[decimalValues.length];
-                for (int i = 0; i < decimalValues.length; i++) {
-                    salt[i] = (byte) Integer.parseInt(decimalValues[i].trim());
-                }
-
-                // Display the byte array
-                for (byte b : salt) {
-                    System.out.print(b + " ");
-                }
-
-                bufferedReader.close();
-
                 // compare hash
                 char[] passwordInput = submitPasswordField.getPassword();
 
-                byte[] newHash = HashTools.hashPassword(passwordInput, salt);
+                byte[] newHash = EncryptionTools.hashPassword(passwordInput);
 
-                if (Arrays.equals(newHash, hash)) {
+                if (Arrays.equals(newHash, readHash)) {
                     // correct password
                     MainGUI.masterPassword = submitPasswordField.getPassword();
 
