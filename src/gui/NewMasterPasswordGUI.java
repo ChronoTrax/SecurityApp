@@ -1,6 +1,6 @@
 package gui;
 
-import tools.HashTools;
+import tools.EncryptionTools;
 
 import javax.swing.*;
 import java.io.BufferedWriter;
@@ -34,8 +34,8 @@ public class NewMasterPasswordGUI extends JFrame {
                 // write to file
                 try {
                     // hash password for saving
-                    byte[] salt = HashTools.generateSalt();
-                    byte[] hash = HashTools.hashPassword(newPass, salt);
+                    byte[] salt = EncryptionTools.generateSalt();
+                    byte[] hash = EncryptionTools.hashPassword(newPass, salt);
 
                     File file = new File("masterpass.txt");
 

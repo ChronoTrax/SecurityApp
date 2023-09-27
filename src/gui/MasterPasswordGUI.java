@@ -1,6 +1,6 @@
 package gui;
 
-import tools.HashTools;
+import tools.EncryptionTools;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -79,7 +79,7 @@ public class MasterPasswordGUI extends JFrame {
                 // compare hash
                 char[] passwordInput = submitPasswordField.getPassword();
 
-                byte[] newHash = HashTools.hashPassword(passwordInput, salt);
+                byte[] newHash = EncryptionTools.hashPassword(passwordInput, salt);
 
                 if (Arrays.equals(newHash, hash)) {
                     // correct password

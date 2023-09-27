@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class SavingTools {
+public class DatabaseTools {
     private static final String DB_NAME = "jdbc:sqlite:passDB.sqlite";
     private static final Connection CONNECTION;
     private static final String CREATE_DATABASE = "create table if not exists Passwords (website varchar(150) not null primary key, username varchar(50) not null, encryptedPass varchar(300) not null, salt varchar(16));";
@@ -43,7 +43,7 @@ public class SavingTools {
         }
 
         // generate salt
-        byte[] salt = HashTools.generateSalt();
+        byte[] salt = EncryptionTools.generateSalt();
 
         // encrypt password
         String encryptedPass = EncryptionTools.encryptUserPassword(MainGUI.masterPassword, password, salt);
@@ -137,26 +137,6 @@ public class SavingTools {
         PreparedStatement ps = CONNECTION.prepareStatement(CREATE_DATABASE);
         ps.execute();
     }
-
-    // TODO: Remove
-/*    public static void getHashAndSalt() {
-        String password = "";
-        byte[] salt = generateSalt();
-
-        try {
-            int iterations = 10000; // number of iterations
-            int keyLength = 256; // key length in bits
-
-            byte[] hashedPassword = hashPassword(password.toCharArray(), salt, iterations, keyLength);
-            String hashedPasswordBase64 = Base64.getEncoder().encodeToString(hashedPassword);
-
-            System.out.println("Salt: " + Base64.getEncoder().encodeToString(salt));
-            System.out.println("Hashed Password: " + hashedPasswordBase64);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-    }*/
-
     public record PasswordRecord(String website, String username, String encryptedPass) {
         @Override
         public String toString() {

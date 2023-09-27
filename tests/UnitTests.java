@@ -1,6 +1,5 @@
 import org.junit.Test;
 import tools.EncryptionTools;
-import tools.HashTools;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -14,7 +13,7 @@ public class UnitTests {
     public void testEncryption() throws Exception {
         char[] masterPass = "12345678123456781234567812345678".toCharArray();
         String original = "Hello World!";
-        byte[] salt = HashTools.generateSalt();
+        byte[] salt = EncryptionTools.generateSalt();
         String encrypt = EncryptionTools.encryptUserPassword(masterPass, original.toCharArray(), salt);
         System.out.println(encrypt);
         char[] decrypt = EncryptionTools.decryptUserPassword(masterPass, encrypt, salt);
