@@ -1,25 +1,24 @@
 package tools;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 
 public class EncryptionTools {
     private static final String ENCRYPTION_ALGORITHM = "AES/CBC/PKCS5Padding";
-    private static final String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA256";
-    private static final int KEY_LENGTH = 256; // Key size in bits
-    private static final int ITERATIONS = 10000; // Number of iterations, can change
+
+    private static final String HASHING_ALGORITHM = "SHA-256";
 
     /**
      * @param masterPass Master password of user
@@ -49,7 +48,7 @@ public class EncryptionTools {
 
     private static SecretKeySpec getSecretKeySpec(char[] myKey) throws NoSuchAlgorithmException {
         byte[] keyBytes = new String(myKey).getBytes();
-        MessageDigest sha = MessageDigest.getInstance("SHA-256");
+        MessageDigest sha = MessageDigest.getInstance(HASHING_ALGORITHM);
         byte[] hashedBytes = Arrays.copyOf(sha.digest(keyBytes), 16);
         return new SecretKeySpec(hashedBytes, "AES");
     }
@@ -108,17 +107,15 @@ public class EncryptionTools {
 
     /**
      * @param password User's password
-     * @param salt     A random salt
      * @return byte[]
      * @throws NoSuchAlgorithmException error while accessing/reading information in the file
      * @throws InvalidKeySpecException  Invalid encoding, wrong length, uninitialized
      */
-    public static byte[] hashPassword(char[] password, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        int iterations = 10000;
-        int keyLength = 256;
-        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyLength);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        return factory.generateSecret(spec).getEncoded();
+    public static byte[] hashPassword(char[] password) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance(HASHING_ALGORITHM);
+
+        byte[] passwordBytes = new String(password).getBytes(StandardCharsets.UTF_8);
+
+        return digest.digest(passwordBytes);
     }
 }

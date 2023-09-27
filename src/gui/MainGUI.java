@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 public class MainGUI extends JFrame {
+    public static final String masterPasswordFilePath = "masterpass.txt";
+
     public static char[] masterPassword = null;
     private JPanel mainPanel;
     private JPanel passwordTestPanel;

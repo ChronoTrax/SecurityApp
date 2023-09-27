@@ -4,7 +4,6 @@ import gui.MainGUI;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class DatabaseTools {
     private static final String DB_NAME = "jdbc:sqlite:passDB.sqlite";
@@ -120,11 +119,11 @@ public class DatabaseTools {
         // loop through select results
         while (rs.next()) {
             // decrypt password
-            char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, rs.getString("encryptedPass"), rs.getString("salt").getBytes());
+            char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, rs.getString("encryptedPass"), rs.getBytes("salt"));
 
             // create new Record
             PasswordRecord record = new PasswordRecord(rs.getString("website"),
-                    rs.getString("username"), Arrays.toString(pass));
+                    rs.getString("username"), new String(pass));
 
             list.add(record);
         }
@@ -137,6 +136,7 @@ public class DatabaseTools {
         PreparedStatement ps = CONNECTION.prepareStatement(CREATE_DATABASE);
         ps.execute();
     }
+
     public record PasswordRecord(String website, String username, String encryptedPass) {
         @Override
         public String toString() {
