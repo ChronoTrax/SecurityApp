@@ -15,7 +15,7 @@ public class UnitTests {
         char[] masterPass = "aaa".toCharArray();
         char[] original = "Hello World!".toCharArray();
         byte[] salt = EncryptionTools.generateSalt();
-        String encrypt = EncryptionTools.encryptUserPassword(masterPass, original, salt);
+        char[] encrypt = EncryptionTools.encryptUserPassword(masterPass, original, salt);
         System.out.println(encrypt);
         char[] decrypt = EncryptionTools.decryptUserPassword(masterPass, encrypt, salt);
         System.out.println(decrypt);

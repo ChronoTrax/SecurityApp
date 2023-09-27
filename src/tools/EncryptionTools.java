@@ -1,17 +1,16 @@
 package tools;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
+import java.security.*;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -21,65 +20,90 @@ public class EncryptionTools {
     private static final String HASHING_ALGORITHM = "SHA-256";
 
     /**
-     * @param masterPass Master password of user
-     * @param userPass   Password for current site
-     * @param salt       A randomly generated salt
-     * @return char[]
-     * @throws Exception could be illegal block size, padding, or {@link java.security.NoSuchAlgorithmException}
+     * Encrypts the user's password using the master password as the key, with salt to randomize.
+     *
+     * @param masterPass master password to be used as encryption key.
+     * @param userPass   user's password to be encrypted.
+     * @param salt       random salt to be used in encryption.
+     * @return encrypted user password.
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidAlgorithmParameterException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
      */
-    public static String encryptUserPassword(char[] masterPass, char[] userPass, byte[] salt) throws Exception {
+    public static char[] encryptUserPassword(char[] masterPass, char[] userPass, byte[] salt)
+            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, getSecretKeySpec(masterPass), new IvParameterSpec(salt));
-        return new String(Base64.getEncoder().encode(cipher.doFinal(new String(userPass).getBytes())));
+        return new String(Base64.getEncoder().encode(cipher.doFinal(new String(userPass).getBytes()))).toCharArray();
     }
 
     /**
-     * @param masterPass        Master password for user
-     * @param encryptedUserPass Password for current site
-     * @param salt              A randomly generated salt
-     * @return char[]
-     * @throws Exception could be illegal block size, padding, or {@link java.security.NoSuchAlgorithmException}
+     * Decrypts the encrypted user password using the master password and the salt used to generate the encryption.
+     *
+     * @param masterPass        master password to be used as decryption key.
+     * @param encryptedUserPass user's encrypted password to be decrypted.
+     * @param salt              salt used when encrypting the password.
+     * @return decrypted user password.
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidAlgorithmParameterException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
      */
-    public static char[] decryptUserPassword(char[] masterPass, String encryptedUserPass, byte[] salt) throws Exception {
+    public static char[] decryptUserPassword(char[] masterPass, char[] encryptedUserPass, byte[] salt)
+            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, getSecretKeySpec(masterPass), new IvParameterSpec(salt));
-        return new String(cipher.doFinal(Base64.getDecoder().decode(encryptedUserPass))).toCharArray();
+        return new String(cipher.doFinal(Base64.getDecoder().decode(new String(encryptedUserPass)))).toCharArray();
     }
 
-    private static SecretKeySpec getSecretKeySpec(char[] myKey) throws NoSuchAlgorithmException {
-        byte[] keyBytes = new String(myKey).getBytes();
+    /**
+     * Converts the master password into a secure SecretKeySpec.
+     *
+     * @param masterPass master password used as key.
+     * @return SecureKeySpec for use in encryption.
+     * @throws NoSuchAlgorithmException
+     */
+    private static SecretKeySpec getSecretKeySpec(char[] masterPass) throws NoSuchAlgorithmException {
+        byte[] keyBytes = new String(masterPass).getBytes();
         MessageDigest sha = MessageDigest.getInstance(HASHING_ALGORITHM);
         byte[] hashedBytes = Arrays.copyOf(sha.digest(keyBytes), 16);
         return new SecretKeySpec(hashedBytes, "AES");
     }
 
     /**
-     * This function takes in a filepath (absolute) and converts the data to a byte array. Then, that gets digested and
-     * converted into another byte array, which gets output as a {@link String}.
+     * Takes a file at filePath, then returns the MD5 hash of the file.
      *
-     * @param filepath the absolute filepath that the user selects
-     * @return a {@link BigInteger}         that refers to the hash data of the file uploaded.
-     * @throws IOException              error while accessing/reading information in the file
-     * @throws NoSuchAlgorithmException when an algorithm is requested but not available
+     * @param filePath path of the file to be hashed.
+     * @return String representation of MD5 hash.
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
      */
-    public static String calculateMD5(String filepath) throws IOException, NoSuchAlgorithmException {
-        byte[] data = Files.readAllBytes(Paths.get(filepath));
+    public static String calculateMD5(String filePath) throws IOException, NoSuchAlgorithmException {
+        byte[] data = Files.readAllBytes(Paths.get(filePath));
+
         byte[] hash = MessageDigest.getInstance("MD5").digest(data);
 
         return new BigInteger(1, hash).toString(16);
     }
 
     /**
-     * This function takes in a filepath (absolute) and converts the data to a byte array. Then, that gets digested and
-     * converted into another byte array, which gets output as a {@link String}.
+     * Takes a file at filepath, then returns the SHA256 hash of the file.
      *
-     * @param filePath the absolute filepath that the user selects
-     * @return a {@link String}             that refers to the hash data of the file uploaded.
-     * @throws NoSuchAlgorithmException error while accessing/reading information in the file
-     * @throws IOException              when an algorithm is requested but not available
+     * @param filePath path of the file to be hashed.
+     * @return String representation of SHA256 hash.
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
      */
     public static String calculateSHA256(String filePath) throws NoSuchAlgorithmException, IOException {
         byte[] data = Files.readAllBytes(Paths.get(filePath));
+
         byte[] hash = MessageDigest.getInstance("SHA-256").digest(data);
 
         StringBuilder hexString = new StringBuilder();
@@ -95,27 +119,28 @@ public class EncryptionTools {
     }
 
     /**
-     * Generates a (secure)random salt when called
+     * Generates a secure random salt.
      *
-     * @return byte[]
+     * @return byte[] salt.
      */
     public static byte[] generateSalt() {
         byte[] salt = new byte[16];
+
         new SecureRandom().nextBytes(salt);
+
         return salt;
     }
 
     /**
-     * @param password User's password
-     * @return byte[]
-     * @throws NoSuchAlgorithmException error while accessing/reading information in the file
-     * @throws InvalidKeySpecException  Invalid encoding, wrong length, uninitialized
+     * Hashes a password using the default hashing algorithm (SHA-256).
+     *
+     * @param password password to be hashed.
+     * @return byte[] hash of password.
+     * @throws NoSuchAlgorithmException
      */
-    public static byte[] hashPassword(char[] password) throws Exception {
+    public static byte[] hashPassword(char[] password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(HASHING_ALGORITHM);
 
-        byte[] passwordBytes = new String(password).getBytes(StandardCharsets.UTF_8);
-
-        return digest.digest(passwordBytes);
+        return digest.digest(new String(password).getBytes());
     }
 }

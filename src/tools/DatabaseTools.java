@@ -45,7 +45,7 @@ public class DatabaseTools {
         byte[] salt = EncryptionTools.generateSalt();
 
         // encrypt password
-        String encryptedPass = EncryptionTools.encryptUserPassword(MainGUI.masterPassword, password, salt);
+        char[] encryptedPass = EncryptionTools.encryptUserPassword(MainGUI.masterPassword, password, salt);
 
         // make sure table exists
         createTables();
@@ -54,7 +54,7 @@ public class DatabaseTools {
         PreparedStatement ps = CONNECTION.prepareStatement(INSERT_PASSWORD_RECORD);
         ps.setString(1, website);
         ps.setString(2, username);
-        ps.setString(3, encryptedPass);
+        ps.setString(3, new String(encryptedPass));
         ps.setBytes(4, salt);
         ps.execute();
 
@@ -68,9 +68,9 @@ public class DatabaseTools {
         for (EncryptedPasswordRecord record :
                 list) {
             if (website.equals(record.website)) {
-                char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, record.password, record.salt);
+                char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, record.encryptedPassword, record.salt);
 
-                return new PasswordRecord(record.website, record.username, new String(pass));
+                return new PasswordRecord(record.website, record.username, pass);
             }
         }
 
@@ -84,9 +84,9 @@ public class DatabaseTools {
         for (EncryptedPasswordRecord record :
                 list) {
             if (username.equals(record.username)) {
-                char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, record.password, record.salt);
+                char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, record.encryptedPassword, record.salt);
 
-                return new PasswordRecord(record.website, record.username, new String(pass));
+                return new PasswordRecord(record.website, record.username, pass);
             }
         }
 
@@ -125,7 +125,7 @@ public class DatabaseTools {
             // create new Record
             EncryptedPasswordRecord record = new EncryptedPasswordRecord(rs.getString("website"),
                     rs.getString("username"),
-                    rs.getString("encryptedPass"),
+                    rs.getString("encryptedPassword").toCharArray(),
                     rs.getBytes("salt"));
 
             list.add(record);
@@ -140,16 +140,16 @@ public class DatabaseTools {
         ps.execute();
     }
 
-    public record PasswordRecord(String website, String username, String encryptedPass) {
+    public record PasswordRecord(String website, String username, char[] password) {
         @Override
         public String toString() {
             return "Website: " + website + '\n' +
                     "Username: " + username + '\n' +
-                    "Hashed Password: " + encryptedPass;
+                    "Hashed Password: " + new String(password);
         }
     }
 
-    public record EncryptedPasswordRecord(String website, String username, String password, byte[] salt) {
+    public record EncryptedPasswordRecord(String website, String username, char[] encryptedPassword, byte[] salt) {
 
     }
 }
