@@ -63,12 +63,14 @@ public class DatabaseTools {
 
     public static PasswordRecord findPasswordRecordWithWebsite(String website) throws Exception {
         // get list
-        ArrayList<PasswordRecord> list = getPasswordRecords();
+        ArrayList<EncryptedPasswordRecord> list = getPasswordRecords();
 
-        for (PasswordRecord record :
+        for (EncryptedPasswordRecord record :
                 list) {
             if (website.equals(record.website)) {
-                return record;
+                char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, record.password, record.salt);
+
+                return new PasswordRecord(record.website, record.username, new String(pass));
             }
         }
 
@@ -77,12 +79,14 @@ public class DatabaseTools {
 
     public static PasswordRecord findPasswordRecordWithUsername(String username) throws Exception {
         // get list
-        ArrayList<PasswordRecord> list = getPasswordRecords();
+        ArrayList<EncryptedPasswordRecord> list = getPasswordRecords();
 
-        for (PasswordRecord record :
+        for (EncryptedPasswordRecord record :
                 list) {
             if (username.equals(record.username)) {
-                return record;
+                char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, record.password, record.salt);
+
+                return new PasswordRecord(record.website, record.username, new String(pass));
             }
         }
 
@@ -108,22 +112,21 @@ public class DatabaseTools {
         return true;
     }
 
-    private static ArrayList<PasswordRecord> getPasswordRecords() throws Exception {
+    private static ArrayList<EncryptedPasswordRecord> getPasswordRecords() throws Exception {
         PreparedStatement ps = CONNECTION.prepareStatement(SELECT_PASSWORD_RECORDS);
         ps.execute();
         ResultSet rs = ps.getResultSet();
 
         // create list
-        ArrayList<PasswordRecord> list = new ArrayList<>();
+        ArrayList<EncryptedPasswordRecord> list = new ArrayList<>();
 
         // loop through select results
         while (rs.next()) {
-            // decrypt password
-            char[] pass = EncryptionTools.decryptUserPassword(MainGUI.masterPassword, rs.getString("encryptedPass"), rs.getBytes("salt"));
-
             // create new Record
-            PasswordRecord record = new PasswordRecord(rs.getString("website"),
-                    rs.getString("username"), new String(pass));
+            EncryptedPasswordRecord record = new EncryptedPasswordRecord(rs.getString("website"),
+                    rs.getString("username"),
+                    rs.getString("encryptedPass"),
+                    rs.getBytes("salt"));
 
             list.add(record);
         }
@@ -144,5 +147,9 @@ public class DatabaseTools {
                     "Username: " + username + '\n' +
                     "Hashed Password: " + encryptedPass;
         }
+    }
+
+    public record EncryptedPasswordRecord(String website, String username, String password, byte[] salt) {
+
     }
 }
