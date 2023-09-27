@@ -25,7 +25,7 @@ public class EncryptionTools {
      * @param masterPass master password to be used as encryption key.
      * @param userPass   user's password to be encrypted.
      * @param salt       random salt to be used in encryption.
-     * @return encrypted user password.
+     * @return char[] encrypted user password.
      * @throws NoSuchPaddingException
      * @throws NoSuchAlgorithmException
      * @throws InvalidAlgorithmParameterException
@@ -47,7 +47,7 @@ public class EncryptionTools {
      * @param masterPass        master password to be used as decryption key.
      * @param encryptedUserPass user's encrypted password to be decrypted.
      * @param salt              salt used when encrypting the password.
-     * @return decrypted user password.
+     * @return char[] decrypted user password.
      * @throws NoSuchPaddingException
      * @throws NoSuchAlgorithmException
      * @throws InvalidAlgorithmParameterException
@@ -67,7 +67,7 @@ public class EncryptionTools {
      * Converts the master password into a secure SecretKeySpec.
      *
      * @param masterPass master password used as key.
-     * @return SecureKeySpec for use in encryption.
+     * @return {@link SecretKeySpec} for use in encryption.
      * @throws NoSuchAlgorithmException
      */
     private static SecretKeySpec getSecretKeySpec(char[] masterPass) throws NoSuchAlgorithmException {
@@ -81,7 +81,7 @@ public class EncryptionTools {
      * Takes a file at filePath, then returns the MD5 hash of the file.
      *
      * @param filePath path of the file to be hashed.
-     * @return String representation of MD5 hash.
+     * @return {@link String} representation of MD5 hash.
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
@@ -97,7 +97,7 @@ public class EncryptionTools {
      * Takes a file at filepath, then returns the SHA256 hash of the file.
      *
      * @param filePath path of the file to be hashed.
-     * @return String representation of SHA256 hash.
+     * @return {@link String} representation of SHA256 hash.
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */

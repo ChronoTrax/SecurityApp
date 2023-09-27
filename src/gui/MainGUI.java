@@ -38,7 +38,7 @@ public class MainGUI extends JFrame {
     private JTextArea loadPasswordResultField;
     private JButton deleteLoadedPasswordBtn;
     private JButton deleteDatabaseBtn;
-    private DatabaseTools.PasswordRecord loadedPasswordRecord = null;
+    private DatabaseTools.AccountRecord loadedAccountRecord = null;
 
 
     public MainGUI() {
@@ -137,7 +137,7 @@ public class MainGUI extends JFrame {
                     loadPasswordResultField.setText("");
 
                     // reset loaded password
-                    loadedPasswordRecord = null;
+                    loadedAccountRecord = null;
                 }
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
@@ -148,7 +148,7 @@ public class MainGUI extends JFrame {
     }
 
     private void deletePassword() {
-        if (loadedPasswordRecord == null) {
+        if (loadedAccountRecord == null) {
             JOptionPane.showMessageDialog(mainPanel, "No password has been loaded yet.",
                     "Error!", JOptionPane.ERROR_MESSAGE);
 
@@ -156,12 +156,12 @@ public class MainGUI extends JFrame {
         }
 
         int choice = JOptionPane.showConfirmDialog(mainPanel,
-                "Are you sure you want to delete password for: " + loadedPasswordRecord.website() + "?",
+                "Are you sure you want to delete password for: " + loadedAccountRecord.website() + "?",
                 "Confirmation", JOptionPane.YES_NO_OPTION);
 
         if (choice == JOptionPane.YES_OPTION) {
             try {
-                if (DatabaseTools.deletePasswordRecord(loadedPasswordRecord.website())) {
+                if (DatabaseTools.deletePasswordRecord(loadedAccountRecord.website())) {
                     JOptionPane.showMessageDialog(mainPanel, "Deleted password.",
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
 
@@ -169,7 +169,7 @@ public class MainGUI extends JFrame {
                     loadPasswordResultField.setText("");
 
                     // reset loaded password
-                    loadedPasswordRecord = null;
+                    loadedAccountRecord = null;
                 }
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
@@ -193,7 +193,7 @@ public class MainGUI extends JFrame {
             char[] password = savePasswordField.getPassword();
 
             // try saving password to database
-            if (DatabaseTools.savePassword(website, username, password)) {
+            if (DatabaseTools.savePassword(new DatabaseTools.AccountRecord(website, username, password))) {
                 JOptionPane.showMessageDialog(mainPanel, "Saved password.",
                         "Saved", JOptionPane.INFORMATION_MESSAGE);
 
@@ -201,6 +201,9 @@ public class MainGUI extends JFrame {
                 saveWebsiteField.setText("");
                 saveUsernameField.setText("");
                 savePasswordField.setText("");
+            } else {
+                JOptionPane.showMessageDialog(mainPanel, "Could not save password.",
+                        "Error!", JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception exc) {
             JOptionPane.showMessageDialog(mainPanel, "Something went wrong: " +
@@ -213,7 +216,7 @@ public class MainGUI extends JFrame {
         String username = loadUsernameSearchField.getText();
 
         try {
-            DatabaseTools.PasswordRecord record = DatabaseTools.findPasswordRecordWithUsername(username);
+            DatabaseTools.AccountRecord record = DatabaseTools.findPasswordRecordWithUsername(username);
             if (record == null) {
                 JOptionPane.showMessageDialog(mainPanel, "Could not find password for: " + username,
                         "Could Not find Password", JOptionPane.ERROR_MESSAGE);
@@ -221,7 +224,7 @@ public class MainGUI extends JFrame {
             }
 
             loadPasswordResultField.setText(record.toString());
-            loadedPasswordRecord = record;
+            loadedAccountRecord = record;
 
             // clear input fields
             loadUsernameSearchField.setText("");
@@ -236,7 +239,7 @@ public class MainGUI extends JFrame {
         String website = loadWebsiteSearchField.getText();
 
         try {
-            DatabaseTools.PasswordRecord record = DatabaseTools.findPasswordRecordWithWebsite(website);
+            DatabaseTools.AccountRecord record = DatabaseTools.findPasswordRecordsWithWebsite(website);
             if (record == null) {
                 JOptionPane.showMessageDialog(mainPanel, "Could not find password for: " + website,
                         "Could Not find Password", JOptionPane.ERROR_MESSAGE);
@@ -244,7 +247,7 @@ public class MainGUI extends JFrame {
             }
 
             loadPasswordResultField.setText(record.toString());
-            loadedPasswordRecord = record;
+            loadedAccountRecord = record;
 
             // clear input fields
             loadWebsiteSearchField.setText("");
