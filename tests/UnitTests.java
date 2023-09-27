@@ -11,14 +11,14 @@ import static org.junit.Assert.*;
 public class UnitTests {
     @Test
     public void testEncryption() throws Exception {
-        char[] masterPass = "12345678123456781234567812345678".toCharArray();
-        String original = "Hello World!";
+        char[] masterPass = "aaa".toCharArray();
+        char[] original = "Hello World!".toCharArray();
         byte[] salt = EncryptionTools.generateSalt();
-        String encrypt = EncryptionTools.encryptUserPassword(masterPass, original.toCharArray(), salt);
+        String encrypt = EncryptionTools.encryptUserPassword(masterPass, original, salt);
         System.out.println(encrypt);
         char[] decrypt = EncryptionTools.decryptUserPassword(masterPass, encrypt, salt);
         System.out.println(decrypt);
-        assertEquals(original, new String(decrypt));
+        assertArrayEquals(original, decrypt);
     }
 
     @Test

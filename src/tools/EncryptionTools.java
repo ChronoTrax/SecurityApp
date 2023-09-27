@@ -1,20 +1,18 @@
 package tools;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 public class EncryptionTools {
@@ -31,19 +29,9 @@ public class EncryptionTools {
      * @throws Exception could be illegal block size, padding, or {@link java.security.NoSuchAlgorithmException}
      */
     public static String encryptUserPassword(char[] masterPass, char[] userPass, byte[] salt) throws Exception {
-        // Convert char[] password to byte[] for later use
-        byte[] userPasswordBytes = new String(userPass).getBytes();
-
-        SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
-        KeySpec masterKeySpec = new PBEKeySpec(masterPass, salt, ITERATIONS, KEY_LENGTH);
-        SecretKey masterKey = new SecretKeySpec(factory.generateSecret(masterKeySpec).getEncoded(), "AES");
-
         Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, masterKey, new IvParameterSpec(salt));
-
-        byte[] encryptedPassword = cipher.doFinal(userPasswordBytes);
-
-        return Base64.getEncoder().encodeToString(encryptedPassword);
+        cipher.init(Cipher.ENCRYPT_MODE, getSecretKeySpec(masterPass), new IvParameterSpec(salt));
+        return new String(Base64.getEncoder().encode(cipher.doFinal(new String(userPass).getBytes())));
     }
 
     /**
@@ -54,20 +42,16 @@ public class EncryptionTools {
      * @throws Exception could be illegal block size, padding, or {@link java.security.NoSuchAlgorithmException}
      */
     public static char[] decryptUserPassword(char[] masterPass, String encryptedUserPass, byte[] salt) throws Exception {
-        // Convert char[] master password to byte[]
-        byte[] masterPassBytes = new String(masterPass).getBytes();
-
-        SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
-        KeySpec masterKeySpec = new PBEKeySpec(masterPass, salt, ITERATIONS, KEY_LENGTH);
-        SecretKey masterKey = new SecretKeySpec(factory.generateSecret(masterKeySpec).getEncoded(), "AES");
-
         Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, masterKey, new IvParameterSpec(salt));
+        cipher.init(Cipher.DECRYPT_MODE, getSecretKeySpec(masterPass), new IvParameterSpec(salt));
+        return new String(cipher.doFinal(Base64.getDecoder().decode(encryptedUserPass))).toCharArray();
+    }
 
-        byte[] decryptedPasswordBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedUserPass));
-
-        // Convert byte[] decrypted password to char[]
-        return new String(decryptedPasswordBytes).toCharArray();
+    private static SecretKeySpec getSecretKeySpec(char[] myKey) throws NoSuchAlgorithmException {
+        byte[] keyBytes = new String(myKey).getBytes();
+        MessageDigest sha = MessageDigest.getInstance("SHA-256");
+        byte[] hashedBytes = Arrays.copyOf(sha.digest(keyBytes), 16);
+        return new SecretKeySpec(hashedBytes, "AES");
     }
 
     /**
